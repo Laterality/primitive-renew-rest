@@ -1,0 +1,27 @@
+{
+  "name": "primitive-web",
+  "version": "1.0.0",
+  "description": "Website for KNU Primitive",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Laterality/primitive-web.git"
+  },
+  "author": "Laterality",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Laterality/primitive-web/issues"
+  },
+  "homepage": "https://github.com/Laterality/primitive-web#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-mocha": "^5.0.0",
+    "gulp-typescript": "^4.0.1"
+  },
+  "dependencies": {
+    "npm": "^5.7.1"
+  }
+}
