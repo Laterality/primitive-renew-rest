@@ -1,4 +1,9 @@
+import * as bodyParser from "body-parser";
 import * as express from "express";
+
+import { config } from "./config";
+
+import * as apiRouter from "./route/api/router";
 
 const app = express();
 
@@ -8,7 +13,9 @@ app.use((req: express.Request, res: express.Response) => {
 	res.end();
 });
 
-app.listen(3100, (err: Error) => {
+app.use("/api", apiRouter.router);
+
+app.listen(config.port, (err: Error) => {
 	if (err) {
 		console.log("error occurred");
 	}
