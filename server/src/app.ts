@@ -5,7 +5,7 @@ import * as morgan from "morgan";
 
 import { config } from "./config";
 
-import * as apiRouter from "./route/api/router";
+import { APIRouter } from "./route/api/router";
 
 import { IDatabase } from "./db/db-interface";
 import { MongoDBImpl } from "./db/mongodb.impl";
@@ -28,7 +28,7 @@ app.use((req: express.Request, res: express.Response) => {
 	res.end();
 });
 
-app.use("/api", apiRouter.router);
+app.use("/api", new APIRouter(db).getRouter());
 
 app.listen(config.port, (err: Error) => {
 	if (err) {

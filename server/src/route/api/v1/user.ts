@@ -3,6 +3,7 @@ import * as mongoose from "mongoose";
 
 import { IDatabase } from "../../../db/db-interface";
 import * as model from "../../../db/models";
+import { RoleDBO } from "../../../db/role.dbo";
 import * as auth from "../../../lib/auth";
 import * as resHandler from "../../../lib/response-handler";
 import * as roleCache from "../../../lib/role-cache";
@@ -55,7 +56,7 @@ export class UserAPI {
 			// 입력값 유효성 검사
 			if (name && sid && password && role) {
 				const authInfo = await auth.encryption(password);
-				const roleIdFound = roleCache.RoleCache.getInstance().getIdByTitle(role);
+				const roleIdFound = roleCache.RoleCache.getInstance(this.db).getIdByTitle(role);
 
 				if (!roleIdFound) {
 					// 해당 역할이 없는 경우
@@ -205,18 +206,21 @@ export class UserAPI {
 		const usersFound: any[]			= [];
 		const queryRoleTitles: string	= req.query["roles"];
 		const roleIds: string[]			= [];
-		const rc						= roleCache.RoleCache.getInstance();
+		const rc						= roleCache.RoleCache.getInstance(this.db);
 		let roleTitles: string[] = [];
 
 		// 역할명 쿼리값을 분리, id로 변환하여 배열에 저장
 		if (queryRoleTitles) {
 			roleTitles = queryRoleTitles.split(",");
 			for (const roleTitle of roleTitles) {
-				roleIds.push(rc.getIdByTitle(roleTitle));
+				roleIds.push(rc.getIdByTitle(roleTitle) as string);
 			}
 		}
 		else {
-			roleIds.push(rc.getIdByTitle("재학생"));
+			const senior = rc.getIdByTitle("재학생");
+			if (senior) {
+				roleIds.push(senior);
+			}
 		}
 
 		try {
