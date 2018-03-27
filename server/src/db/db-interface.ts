@@ -7,23 +7,23 @@ export interface IDatabase {
 	 * 회원 생성
 	 * @param newUser 생성할 회원
 	 */
-	createUser(newUser: UserDBO): Promise<UserDBO>;
+	createUser(newUser: UserDBO): Promise<UserDBO | null>;
 
 	/**
 	 * id로 회원을 조회
 	 */
-	findUserById(id: string): Promise<UserDBO>;
+	findUserById(id: string): Promise<UserDBO | null>;
 
 	/**
 	 * 모든 회원을 조회
 	 */
-	findAllUser(): Promise<UserDBO[]>;
+	findAllUser(): Promise<UserDBO[] | null>;
 
 	/**
 	 * 회원 검색
 	 * @param keyword 검색 키워드(학번, 이름)
 	 */
-	searchUser(keyword: string): Promise<UserDBO>;
+	searchUser(keyword: string): Promise<UserDBO | null>;
 	
 	/**
 	 * 회원의 현재 상태를 DB에 반영
@@ -42,22 +42,22 @@ export interface IDatabase {
 	 * 역할 생성
 	 * @param role 생성할 역할
 	 */
-	createRole(role: RoleDBO): Promise<RoleDBO>;
+	createRole(role: RoleDBO): Promise<RoleDBO | null>;
 
 	/**
 	 * 
 	 * @param id 조회할 role의 id
 	 */
-	findRoleById(id: string): Promise<RoleDBO>;
+	findRoleById(id: string): Promise<RoleDBO | null>;
 
 	/**
 	 * 
 	 * @param title 조회할 role의 role_title
 	 */
-	findRoleByTitle(title: string): Promise<RoleDBO[]>;
+	findRoleByTitle(title: string): Promise<RoleDBO[] | null>;
 
 	/**
 	 * 모든 role 조회
 	 */
-	findAllRole(): Promise<RoleDBO[]>;
+	findAllRole(): Promise<RoleDBO[] | null>;
 }
