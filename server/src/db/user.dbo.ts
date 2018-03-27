@@ -30,6 +30,10 @@ export class UserDBO {
 		return this.salt;
 	}
 
+	public getRole() {
+		return this.role;
+	}
+
 	public setPassword(password: string) {
 		this.password = password;
 	}
