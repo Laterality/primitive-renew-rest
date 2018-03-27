@@ -1,7 +1,6 @@
-import { IDBO } from "./dbo.interface";
 import { RoleDBO } from "./role.dbo";
 
-export class UserDBO implements IDBO {
+export class UserDBO {
 
 	public constructor(
 		private sid: string, 
@@ -37,10 +36,5 @@ export class UserDBO implements IDBO {
 
 	public setRole(role: RoleDBO) {
 		this.role = role;
-	}
-
-	public save() {
-		// TODO: implement save entire properties up to db interface
-		return null;
 	}
 }
