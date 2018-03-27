@@ -17,7 +17,7 @@ export interface IDatabase {
 	/**
 	 * 모든 회원을 조회
 	 */
-	findAllUser(): Promise<UserDBO[] | null>;
+	findAllUser(): Promise<UserDBO[]>;
 
 	/**
 	 * 회원 검색
@@ -54,10 +54,10 @@ export interface IDatabase {
 	 * 
 	 * @param title 조회할 role의 role_title
 	 */
-	findRoleByTitle(title: string): Promise<RoleDBO[] | null>;
+	findRoleByTitle(title: string): Promise<RoleDBO[]>;
 
 	/**
 	 * 모든 role 조회
 	 */
-	findAllRole(): Promise<RoleDBO[] | null>;
+	findAllRole(): Promise<RoleDBO[]>;
 }
