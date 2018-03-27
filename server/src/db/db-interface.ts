@@ -23,7 +23,7 @@ export interface IDatabase {
 	 * 회원 검색
 	 * @param keyword 검색 키워드(학번, 이름)
 	 */
-	searchUser(keyword: string): Promise<UserDBO[] | null>;
+	searchUser(keyword: string, roleIds: string[]): Promise<UserDBO[] | null>;
 	
 	/**
 	 * 회원의 현재 상태를 DB에 반영
