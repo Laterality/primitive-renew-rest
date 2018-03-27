@@ -1,11 +1,22 @@
 import * as bodyParser from "body-parser";
 import * as express from "express";
+import * as session from "express-session";
+import * as morgan from "morgan";
 
 import { config } from "./config";
 
 import * as apiRouter from "./route/api/router";
 
 const app = express();
+
+app.use(morgan("dev"));
+
+// TODO: production에서는 시크릿 값 수정해야 함
+app.use(session({
+	secret: "@#@$MYSIGN#@$#$",
+	resave: false,
+	saveUninitialized: true,
+}));
 
 app.use((req: express.Request, res: express.Response) => {
 	res.status(200);

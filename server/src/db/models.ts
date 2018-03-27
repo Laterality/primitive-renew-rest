@@ -2,14 +2,17 @@ import * as mongoose from "mongoose";
 
 export const UserModel = mongoose.model("User", new mongoose.Schema({
 	name: mongoose.SchemaTypes.String,
-	sid: mongoose.SchemaTypes.String,
+	sid: {
+		type: mongoose.SchemaTypes.String,
+		unique: true,
+	},
 	password: mongoose.SchemaTypes.String,
 	salt: mongoose.SchemaTypes.String,
 	role: {
 		type: mongoose.SchemaTypes.ObjectId,
 		ref: "Role",
 	},
-}));
+}).index({name: "text", sid: "text"}));
 
 export const RoleModel = mongoose.model("Role", new mongoose.Schema({
 	role_title: mongoose.SchemaTypes.String,
