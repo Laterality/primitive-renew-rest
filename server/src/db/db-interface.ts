@@ -1,7 +1,7 @@
 import { RoleDBO } from "./role.dbo";
 import { UserDBO } from "./user.dbo";
 
-export interface IDB {
+export interface IDatabase {
 
 	/**
 	 * 회원 생성
