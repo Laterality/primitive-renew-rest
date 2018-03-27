@@ -1,8 +1,8 @@
 export class RoleDBO {
 
-	public constructor(
-		private id: string | number, 
-		private roleTitle: string) {}
+	public constructor( 
+		private roleTitle: string,
+		private id?: string | number) {}
 
 	public getId() {
 		return this.id;
