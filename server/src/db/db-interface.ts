@@ -1,3 +1,4 @@
+import { RoleDBO } from "./role.dbo";
 import { UserDBO } from "./user.dbo";
 
 export interface IDB {
@@ -36,4 +37,27 @@ export interface IDB {
 	 * @param user 삭제할 회원
 	 */
 	removeUser(user: UserDBO): void;
+
+	/**
+	 * 역할 생성
+	 * @param role 생성할 역할
+	 */
+	createRole(role: RoleDBO): RoleDBO;
+
+	/**
+	 * 
+	 * @param id 조회할 role의 id
+	 */
+	findRoleById(id: string): RoleDBO;
+
+	/**
+	 * 
+	 * @param title 조회할 role의 role_title
+	 */
+	findRoleByTitle(title: string): RoleDBO[];
+
+	/**
+	 * 모든 role 조회
+	 */
+	findAllRole(): RoleDBO[];
 }
