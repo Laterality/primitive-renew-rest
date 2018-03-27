@@ -7,6 +7,20 @@ import { UserDBO } from "./user.dbo";
 
 export class MongoDBImpl implements IDatabase {
 
+	public static getInstance(): MongoDBImpl {
+		if (!this.mInstance) {
+			this.mInstance = new MongoDBImpl();
+		}
+
+		return this.mInstance;
+	}
+
+	private static mInstance: MongoDBImpl;
+
+	private constructor() {
+
+	}
+
 	/**
 	 * 회원 생성
 	 * @param newUser 생성할 회원
