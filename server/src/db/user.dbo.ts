@@ -4,12 +4,12 @@ import { RoleDBO } from "./role.dbo";
 export class UserDBO implements IDBO {
 
 	public constructor(
-		private id: string | number,
 		private sid: string, 
 		private name: string, 
 		private password: string, 
 		private salt: string, 
-		private role: RoleDBO) {}
+		private role: RoleDBO,
+		private id?: string | number) {}
 
 	public getId() {
 		return this.id;
