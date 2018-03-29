@@ -1,9 +1,8 @@
 import * as express from "express";
-import * as mongoose from "mongoose";
 
 import { IDatabase } from "../../../db/db-interface";
-import * as model from "../../../db/models";
 import { RoleDBO } from "../../../db/role.dbo";
+import { UserDBO } from "../../../db/user.dbo";
 import * as auth from "../../../lib/auth";
 import * as resHandler from "../../../lib/response-handler";
 import * as roleCache from "../../../lib/role-cache";
@@ -56,9 +55,9 @@ export class UserAPI {
 			// 입력값 유효성 검사
 			if (name && sid && password && role) {
 				const authInfo = await auth.encryption(password);
-				const roleIdFound = roleCache.RoleCache.getInstance(this.db).getIdByTitle(role);
+				const roleFound = roleCache.RoleCache.getInstance(this.db).getByTitle(role);
 
-				if (!roleIdFound) {
+				if (!roleFound) {
 					// 해당 역할이 없는 경우
 					return resHandler.response(res, new resHandler.ApiResponse(
 						resHandler.ApiResponse.CODE_INVALID_PARAMETERS,
@@ -67,14 +66,12 @@ export class UserAPI {
 				}
 
 				// 사용자 모델 객체 생성
-				const newUser = new model.UserModel({
-					name,
+				const newUser = new UserDBO(
 					sid,
-					password: authInfo[0],
-					salt: authInfo[1],
-					role: roleIdFound});
-
-				await newUser.save();
+					name,
+					authInfo[0],
+					authInfo[1],
+					roleFound);
 
 				return resHandler.response(res, new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_OK,
@@ -82,11 +79,7 @@ export class UserAPI {
 					"",
 					{
 						name: "newUser",
-						obj: {
-							_id: newUser._id,
-							name: (newUser as any)["name"],
-							sid: (newUser as any)["sid"],
-							role: (newUser as any)["role"]["role_title"]}}));
+						obj: serializer.serializeUser(newUser)}));
 			}
 			else {
 				return resHandler.response(res, new resHandler.ApiResponse(
@@ -115,7 +108,7 @@ export class UserAPI {
 	private async retrieveAllUsers(req: express.Request, res: express.Response) {
 
 		try {
-			const usersFound = await model.UserModel.find().populate("role").exec();
+			const usersFound = await this.db.findAllUser();
 			const users: any[] = [];
 
 			for (const u of usersFound) {
@@ -155,7 +148,7 @@ export class UserAPI {
 
 		try {
 			if (id) {
-				const userFound = await model.UserModel.findById(id).populate("role").exec();
+				const userFound = await this.db.findUserById(id);
 		
 				if (userFound) {
 					// 사용자가 존재
@@ -213,13 +206,13 @@ export class UserAPI {
 		if (queryRoleTitles) {
 			roleTitles = queryRoleTitles.split(",");
 			for (const roleTitle of roleTitles) {
-				roleIds.push(rc.getIdByTitle(roleTitle) as string);
+				roleIds.push((rc.getByTitle(roleTitle) as RoleDBO).getId() as string);
 			}
 		}
 		else {
-			const senior = rc.getIdByTitle("재학생");
+			const senior = rc.getByTitle("재학생");
 			if (senior) {
-				roleIds.push(senior);
+				roleIds.push(senior.getId() as string);
 			}
 		}
 
@@ -228,12 +221,7 @@ export class UserAPI {
 				// 키워드가 없으면 전체 리스트를 반환
 				// 하기전에 역할명을 id로 변환
 
-				const result = await model.UserModel.find({
-					role: {
-						$in: roleIds,
-					},
-				}).populate("role").exec();
-
+				const result = await this.db.searchUser("", roleIds);
 				for (const u of result) {
 					usersFound.push(serializer.serializeUser(u));
 				}
@@ -248,18 +236,7 @@ export class UserAPI {
 			}
 			else {
 				// 키워드가 있는 경우
-				const result = await model.UserModel.find({
-					$text: {
-						$search: key,
-					},
-					role: {
-						$in: roleIds,
-					},
-				}, {
-						score: { $meta: "textScore" },
-					})
-					.sort({ score: { $meta: "textScore" }})
-					.populate("role").exec();
+				const result = await this.db.searchUser(key, roleIds);
 
 				for (const u of result) {
 					usersFound.push(serializer.serializeUser(u));
@@ -290,6 +267,7 @@ export class UserAPI {
 	 * @body current_password { string } 현재 비밀번호
 	 * @body new_password { string } 새 비밀번호
 	 * @body new_password_confirm { string } 새 비밀번호 확인
+	 * @body role { string } 변경할 역할
 	 * 
 	 * Response
 	 * @body result { string } 결과
@@ -300,24 +278,36 @@ export class UserAPI {
 		const pwCurrent		= req.body["current_password"];
 		const pwNew			= req.body["new_password"];
 		const pwNewConfirm	= req.body["new_password_confirm"];
+		const role			= req.body["role"];
 
 		try {
-			const userFound = await model.UserModel.findById(userId).exec();
+			const userFound = await this.db.findUserById(userId);
 
-			if (!userFound) {
+			if (userFound === null) {
 				return resHandler.response(res, new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_NOT_FOUND,
 					resHandler.ApiResponse.RESULT_FAIL,
 					"not found(user)"));
 			}
 
-			const currentAuthInfo = await auth.encryption(pwCurrent, (userFound as any)["salt"]);
+			// 여기부터 사용자 수정
+
+			if (role && role.length > 0) {
+				const rc = roleCache.RoleCache.getInstance(this.db);
+				const roleDbo = rc.getByTitle(role);
+				if (!roleDbo) {
+					return resHandler.response(res, resHandler.createServerFaultResponse());
+				}
+				userFound.setRole(roleDbo);
+			}
+
+			const currentAuthInfo = await auth.encryption(pwCurrent, userFound.getSalt());
 
 			// 현재 비밀번호 일치하는지 확인
-			if (currentAuthInfo[0] === (userFound as any)["password"]) {
+			if (currentAuthInfo[0] === userFound.getPassword()) {
 				// 비밀번호 변경
 				if (pwNew === pwNewConfirm) {
-					const newAuthInfo = await auth.encryption(pwNew, (userFound as any)["salt"]);
+					const newAuthInfo = await auth.encryption(pwNew, userFound.getSalt());
 
 					if (newAuthInfo[0] === currentAuthInfo[0]) {
 						// 현재 비밀번호와 새 비밀번호가 같은 경우
@@ -327,12 +317,7 @@ export class UserAPI {
 							"new password is same with current password"));
 					}
 
-					(userFound as any)["password"] = pwNew;
-					await userFound.save();
-
-					return resHandler.response(res, new resHandler.ApiResponse( 
-						resHandler.ApiResponse.CODE_OK,
-						resHandler.ApiResponse.RESULT_OK));
+					userFound.setPassword(pwNew);
 				}
 				else {
 					return resHandler.response(res, new resHandler.ApiResponse(
@@ -340,6 +325,10 @@ export class UserAPI {
 						resHandler.ApiResponse.RESULT_FAIL,
 						"new password not matched with confirm"));
 				}
+
+				this.db.updateUser(userFound);
+
+				return resHandler.response(res, resHandler.createOKResponse());
 			}
 			else {
 				return resHandler.response(res, new resHandler.ApiResponse(
@@ -370,7 +359,7 @@ export class UserAPI {
 		const userId = req.params["userId"];
 
 		try {
-			const userFound = await model.UserModel.findById(userId).exec();
+			const userFound = await this.db.findUserById(userId);
 
 			if (!userFound) {
 				return resHandler.response(res, new resHandler.ApiResponse(
@@ -379,11 +368,9 @@ export class UserAPI {
 					"not found(user)"));
 			}
 
-			await userFound.remove();
+			this.db.removeUser(userId);
 
-			return resHandler.response(res, new resHandler.ApiResponse(
-				resHandler.ApiResponse.CODE_OK,
-				resHandler.ApiResponse.RESULT_OK));
+			return resHandler.response(res, resHandler.createOKResponse());
 		}
 		catch (e) {
 			throw e;
@@ -409,7 +396,7 @@ export class UserAPI {
 
 		try {
 			// id와 일치하는 사용자 찾기
-			const userFound = await model.UserModel.findOne({sid: userId}).exec();
+			const userFound = await this.db.findUserBySID(userId);
 
 			if (!userFound) {
 				return resHandler.response(res, new resHandler.ApiResponse(
@@ -418,9 +405,9 @@ export class UserAPI {
 					"not found(user)"));
 			}
 
-			const authInfo = await auth.encryption(pw, (userFound as any)["salt"]);
+			const authInfo = await auth.encryption(pw, userFound.getSalt());
 
-			if (authInfo[0] === (userFound as any)["password"]) {
+			if (authInfo[0] === userFound.getPassword()) {
 				// 로그인 성공
 				if (!req.session) {
 					return resHandler.response(res, new resHandler.ApiResponse(
@@ -429,7 +416,7 @@ export class UserAPI {
 						"session undefined problem"));
 				}
 
-				req.session["_id"] = userFound._id;
+				req.session["_id"] = userFound.getId();
 				return resHandler.response(res, new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_OK,
 					resHandler.ApiResponse.RESULT_OK));

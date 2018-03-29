@@ -81,3 +81,16 @@ export class ApiResponse {
 		return JSON.stringify(obj);
 	}
 }
+
+export function createServerFaultResponse() {
+	return new ApiResponse(
+		ApiResponse.CODE_SERVER_FAULT,
+		ApiResponse.RESULT_ERROR,
+		"server fault");
+}
+
+export function createOKResponse() {
+	return new ApiResponse(
+		ApiResponse.CODE_OK,
+		ApiResponse.RESULT_OK);
+}

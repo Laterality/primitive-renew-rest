@@ -23,22 +23,29 @@ export class RoleCache {
 		this.refresh().then();
 	}
 
-	public getIdByTitle(title: string): string | null {
+	public getByTitle(title: string): RoleDBO | null {
 		const found = RoleCache.cache.find((value: any, index: number) => {
 			return value["title"] === title;
 		});
 		if (found) {
-			return found.getId() as string;
+			return found;
 		}
 		else {
 			return null;
 		}
 	}
 
-	public getTitleById(id: string) {
-		return RoleCache.cache.find((value: any, index: number) => {
+	public getById(id: string): RoleDBO | null {
+		const found = RoleCache.cache.find((value: any, index: number) => {
 			return value["_id"] === id;
 		});
+
+		if (found) {
+			return found;
+		}
+		else {
+			return null;
+		}
 	}
 
 	public async refresh() {

@@ -1,9 +1,11 @@
 import * as mongoose from "mongoose";
+import { UserDBO } from "../db/user.dbo";
 
-export function serializeUser(doc: mongoose.Document) {
+export function serializeUser(dbo: UserDBO) {
 	return {
-		name: (doc as any)["name"],
-		sid: (doc as any)["sid"],
-		role: (doc as any)["role"]["role_title"],
+		id: dbo.getId(),
+		name: dbo.getName(),
+		sid: dbo.getSID(),
+		role: dbo.getRole().getTitle(),
 	};
 }

@@ -12,7 +12,13 @@ export interface IDatabase {
 	/**
 	 * id로 회원을 조회
 	 */
-	findUserById(id: string): Promise<UserDBO | null>;
+	findUserById(id: string | number): Promise<UserDBO | null>;
+
+	/**
+	 * sid로 회원을 조회
+	 * @param sid 
+	 */
+	findUserBySID(sid: string): Promise<UserDBO | null>;
 
 	/**
 	 * 모든 회원을 조회
@@ -23,7 +29,7 @@ export interface IDatabase {
 	 * 회원 검색
 	 * @param keyword 검색 키워드(학번, 이름)
 	 */
-	searchUser(keyword: string, roleIds: string[]): Promise<UserDBO[] | null>;
+	searchUser(keyword: string, roleIds: string[]): Promise<UserDBO[]>;
 	
 	/**
 	 * 회원의 현재 상태를 DB에 반영

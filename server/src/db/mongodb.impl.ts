@@ -41,9 +41,19 @@ export class MongoDBImpl implements IDatabase {
 	/**
 	 * id로 회원을 조회
 	 */
-	public async findUserById(id: string): Promise<UserDBO | null> {
+	public async findUserById(id: string | number): Promise<UserDBO | null> {
 		const userFound = await model.UserModel.findById(id).exec();
 		
+		return this.userDocToDBO(userFound);
+	}
+
+	/**
+	 * sid로 회원을 조회
+	 * @param sid 
+	 */
+	public async findUserBySID(sid: string): Promise<UserDBO | null> {
+		const userFound = await model.UserModel.findOne({sid}).populate("role").exec();
+
 		return this.userDocToDBO(userFound);
 	}
 
@@ -61,7 +71,7 @@ export class MongoDBImpl implements IDatabase {
 	 * @param keyword 검색 키워드(학번, 이름)
 	 * @param roleIds 한정할 역할 id 배열
 	 */
-	public async searchUser(keyword: string, roleIds: string[]): Promise<UserDBO[] | null> {
+	public async searchUser(keyword: string, roleIds: string[]): Promise<UserDBO[]> {
 		const result = await model.UserModel.find({
 			$text: {
 				$search: keyword,
