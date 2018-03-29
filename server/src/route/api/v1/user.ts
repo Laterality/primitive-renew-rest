@@ -7,6 +7,7 @@ import * as auth from "../../../lib/auth";
 import * as resHandler from "../../../lib/response-handler";
 import * as roleCache from "../../../lib/role-cache";
 import * as serializer from "../../../lib/serializer";
+import { checkRole } from "../../../lib/session-handler";
 
 export class UserAPI {
 
@@ -51,7 +52,7 @@ export class UserAPI {
 		const password	= req.body["password"];
 		const role		= req.body["role"];
 
-		if (!this.checkRole(req, "관리자")) {
+		if (!checkRole(this.db, req, "관리자")) {
 			// 세션 회원의 역할이 관리자가 아니면 요청 중단
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
@@ -88,7 +89,7 @@ export class UserAPI {
 					"",
 					{
 						name: "newUser",
-						obj: serializer.serializeUser(newUser)}));
+						obj: serializer.serialize(newUser)}));
 			}
 			else {
 				return resHandler.response(res, new resHandler.ApiResponse(
@@ -123,7 +124,7 @@ export class UserAPI {
 					resHandler.ApiResponse.RESULT_FAIL,
 					"login needed"));
 		}
-		if (!this.checkRole(req, ["재학생", "관리자"])) {
+		if (!checkRole(this.db, req, ["재학생", "관리자"])) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_FORBIDDEN,
@@ -135,7 +136,7 @@ export class UserAPI {
 			const users: any[] = [];
 
 			for (const u of usersFound) {
-				users.push(serializer.serializeUser(u));
+				users.push(serializer.serialize(u));
 			}
 
 			return resHandler.response(res, new resHandler.ApiResponse(
@@ -178,7 +179,7 @@ export class UserAPI {
 					"login needed"));
 		}
 
-		if (!(this.checkRole(req, ["재학생", "관리자"]) || 
+		if (!(checkRole(this.db, req, ["재학생", "관리자"]) || 
 			req.session["userId"] === id)) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
@@ -199,7 +200,7 @@ export class UserAPI {
 						"",
 						{
 							name: "user",
-							obj: serializer.serializeUser(userFound)}));
+							obj: serializer.serialize(userFound)}));
 				}
 				else {
 					return resHandler.response(res, new resHandler.ApiResponse(
@@ -252,7 +253,7 @@ export class UserAPI {
 					"login needed"));
 		}
 
-		if (this.checkRole(req, ["재학생", "관리자"])) {
+		if (!checkRole(this.db, req, ["재학생", "관리자"])) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_FORBIDDEN,
@@ -281,7 +282,7 @@ export class UserAPI {
 
 				const result = await this.db.searchUser("", roleIds);
 				for (const u of result) {
-					usersFound.push(serializer.serializeUser(u));
+					usersFound.push(serializer.serialize(u));
 				}
 		
 				return resHandler.response(res, new resHandler.ApiResponse(
@@ -297,7 +298,7 @@ export class UserAPI {
 				const result = await this.db.searchUser(key, roleIds);
 
 				for (const u of result) {
-					usersFound.push(serializer.serializeUser(u));
+					usersFound.push(serializer.serialize(u));
 				}
 
 				return resHandler.response(res, new resHandler.ApiResponse(
@@ -347,7 +348,7 @@ export class UserAPI {
 					"login needed"));
 		}
 
-		if (!(this.checkRole(req, "관리자") ||
+		if (!(checkRole(this.db, req, "관리자") ||
 			req.session["userId"] === userId)) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
@@ -441,7 +442,7 @@ export class UserAPI {
 					"login needed"));
 		}
 
-		if (!(this.checkRole(req, "관리자") ||
+		if (!(checkRole(this.db, req, "관리자") ||
 			req.session["userId"] === userId)) {
 				return resHandler.response(res,
 					new resHandler.ApiResponse(
@@ -564,20 +565,6 @@ export class UserAPI {
 		}
 		catch (e) {
 			throw e;
-		}
-	}
-
-	private async checkRole(req: express.Request, roleTitle: string | string[]): Promise<boolean> {
-		if (!req.session) { return false; }
-
-		const userSess = await this.db.findUserById(req.session["userId"]);
-
-		if (!userSess) { return false; }
-		if (Array.isArray(roleTitle)) {
-			return roleTitle.indexOf(userSess.getRole().getTitle()) > -1;
-		}
-		else {
-			return userSess.getRole().getTitle() === roleTitle;
 		}
 	}
 }
