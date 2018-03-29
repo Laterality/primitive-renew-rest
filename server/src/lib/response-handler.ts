@@ -42,6 +42,7 @@ export class ApiResponse {
 
 	public static readonly CODE_OK = 200;
 	public static readonly CODE_CREATED = 201;
+	public static readonly CODE_FORBIDDEN = 403;
 	public static readonly CODE_NOT_FOUND = 404;
 	public static readonly CODE_INVALID_PARAMETERS = 405;
 	public static readonly CODE_CONFLICT = 409;
