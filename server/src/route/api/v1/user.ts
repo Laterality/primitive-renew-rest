@@ -51,6 +51,15 @@ export class UserAPI {
 		const password	= req.body["password"];
 		const role		= req.body["role"];
 
+		if (!this.checkRole(req, "관리자")) {
+			// 세션 회원의 역할이 관리자가 아니면 요청 중단
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"unauthorized request"));
+		}
+
 		try {
 			// 입력값 유효성 검사
 			if (name && sid && password && role) {
@@ -106,7 +115,21 @@ export class UserAPI {
 	 * @body users { UserModel[] } 사용자 배열
 	 */
 	private async retrieveAllUsers(req: express.Request, res: express.Response) {
-
+		if (!req.session) { throw new Error("session not exists"); }
+		if (!req.session["userId"]) {
+			return resHandler.response(res, 
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"login needed"));
+		}
+		if (!this.checkRole(req, ["재학생", "관리자"])) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"unauthorized request"));
+		}
 		try {
 			const usersFound = await this.db.findAllUser();
 			const users: any[] = [];
@@ -145,6 +168,24 @@ export class UserAPI {
 	 */
 	private async retrieveUserById(req: express.Request, res: express.Response) {
 		const id = req.params["userId"];
+
+		if (!req.session) { throw new Error("session not exist"); }
+		if (!req.session["userId"]) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"login needed"));
+		}
+
+		if (!(this.checkRole(req, ["재학생", "관리자"]) || 
+			req.session["userId"] === id)) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"unauthorized request"));
+		}
 
 		try {
 			if (id) {
@@ -201,6 +242,23 @@ export class UserAPI {
 		const roleIds: string[]			= [];
 		const rc						= roleCache.RoleCache.getInstance(this.db);
 		let roleTitles: string[] = [];
+
+		if (!req.session) { throw new Error("session not exist"); }
+		if (!req.session["userId"]) {
+			return resHandler.response(res, 
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"login needed"));
+		}
+
+		if (this.checkRole(req, ["재학생", "관리자"])) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"unauthorized request"));
+		}
 
 		// 역할명 쿼리값을 분리, id로 변환하여 배열에 저장
 		if (queryRoleTitles) {
@@ -280,6 +338,24 @@ export class UserAPI {
 		const pwNewConfirm	= req.body["new_password_confirm"];
 		const role			= req.body["role"];
 
+		if (!req.session) { throw new Error("session not exist"); }
+		if (!req.session["userId"]) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"login needed"));
+		}
+
+		if (!(this.checkRole(req, "관리자") ||
+			req.session["userId"] === userId)) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"unauthorized request"));
+		}
+
 		try {
 			const userFound = await this.db.findUserById(userId);
 
@@ -291,7 +367,6 @@ export class UserAPI {
 			}
 
 			// 여기부터 사용자 수정
-
 			if (role && role.length > 0) {
 				const rc = roleCache.RoleCache.getInstance(this.db);
 				const roleDbo = rc.getByTitle(role);
@@ -358,6 +433,23 @@ export class UserAPI {
 	private async deleteUser(req: express.Request, res: express.Response) {
 		const userId = req.params["userId"];
 
+		if (!req.session) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"login needed"));
+		}
+
+		if (!(this.checkRole(req, "관리자") ||
+			req.session["userId"] === userId)) {
+				return resHandler.response(res,
+					new resHandler.ApiResponse(
+						resHandler.ApiResponse.CODE_FORBIDDEN,
+						resHandler.ApiResponse.RESULT_FAIL,
+						"unauthorized request"));
+			}
+
 		try {
 			const userFound = await this.db.findUserById(userId);
 
@@ -394,6 +486,15 @@ export class UserAPI {
 		const userId = req.body["id"];
 		const pw = req.body["pw"];
 
+		if (!req.session) { throw new Error("session not exist"); }
+		if (req.session["userId"]) {
+			return resHandler.response(res, 
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"already has logged in"));
+		}
+
 		try {
 			// id와 일치하는 사용자 찾기
 			const userFound = await this.db.findUserBySID(userId);
@@ -416,7 +517,7 @@ export class UserAPI {
 						"session undefined problem"));
 				}
 
-				req.session["_id"] = userFound.getId();
+				(req.session as any)["userId"] = userFound.getId();
 				return resHandler.response(res, new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_OK,
 					resHandler.ApiResponse.RESULT_OK));
@@ -438,6 +539,14 @@ export class UserAPI {
 	 * @body message { string } 결과 메시지
 	 */
 	private async logoutUser(req: express.Request, res: express.Response) {
+		if (!req.session) { throw new Error("session is not exist"); }
+		if (!req.session["userId"]) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_FORBIDDEN,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"login needed"));
+		}
 		const prom = new Promise(() => {
 			(req.session as Express.Session).destroy((err: any) => {
 				if (err) {
@@ -455,6 +564,20 @@ export class UserAPI {
 		}
 		catch (e) {
 			throw e;
+		}
+	}
+
+	private async checkRole(req: express.Request, roleTitle: string | string[]): Promise<boolean> {
+		if (!req.session) { return false; }
+
+		const userSess = await this.db.findUserById(req.session["userId"]);
+
+		if (!userSess) { return false; }
+		if (Array.isArray(roleTitle)) {
+			return roleTitle.indexOf(userSess.getRole().getTitle()) > -1;
+		}
+		else {
+			return userSess.getRole().getTitle() === roleTitle;
 		}
 	}
 }
