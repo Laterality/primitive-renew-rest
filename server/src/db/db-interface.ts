@@ -1,5 +1,6 @@
 import { RoleDBO } from "./role.dbo";
 import { UserDBO } from "./user.dbo";
+import { BoardDBO } from "./board.dbo";
 
 export interface IDatabase {
 
@@ -66,4 +67,33 @@ export interface IDatabase {
 	 * 모든 role 조회
 	 */
 	findAllRole(): Promise<RoleDBO[]>;
+
+	/**
+	 * 게시판 생성
+	 * @param newBoard 생성할 게시판
+	 */
+	createBoard(newBoard: BoardDBO): Promise<BoardDBO>;
+
+	/**
+	 * id로 게시판 조회
+	 * @param id 조회할 게시판 id
+	 */
+	findBoardById(id: string | number): Promise<BoardDBO | null>;
+
+	/**
+	 * 모든 게시판 목록
+	 */
+	findAllBoards(): Promise<BoardDBO[]>;
+
+	/**
+	 * 게시판 갱신
+	 * @param board 갱신할 게시판
+	 */
+	updateBoard(board: BoardDBO): Promise<BoardDBO>;
+
+	/**
+	 * 게시판 삭제
+	 * @param board 삭제할 게시판
+	 */
+	removeBoard(board: BoardDBO): Promise<void>;
 }
