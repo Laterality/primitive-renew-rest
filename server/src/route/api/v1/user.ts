@@ -1,13 +1,14 @@
 import * as express from "express";
 
-import { IDatabase } from "../../../db/db-interface";
-import { RoleDBO } from "../../../db/role.dbo";
-import { UserDBO } from "../../../db/user.dbo";
 import * as auth from "../../../lib/auth";
 import * as resHandler from "../../../lib/response-handler";
 import * as roleCache from "../../../lib/role-cache";
 import * as serializer from "../../../lib/serializer";
 import { checkRole } from "../../../lib/session-handler";
+
+import { IDatabase } from "../../../db/db-interface";
+import { RoleDBO } from "../../../db/role.dbo";
+import { UserDBO } from "../../../db/user.dbo";
 
 export class UserAPI {
 
