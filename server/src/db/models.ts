@@ -18,12 +18,12 @@ export const RoleModel = mongoose.model("Role", new mongoose.Schema({
 	role_title: mongoose.SchemaTypes.String,
 }));
 
-export const File = mongoose.model("File", new mongoose.Schema({
+export const FileModel = mongoose.model("File", new mongoose.Schema({
 	filename: mongoose.SchemaTypes.String,
 	path: mongoose.SchemaTypes.String,
 }));
 
-export const Board = mongoose.model("Board", new mongoose.Schema({
+export const BoardModel = mongoose.model("Board", new mongoose.Schema({
 	board_title: mongoose.SchemaTypes.String,
 	roles_readable: [{
 		type: mongoose.SchemaTypes.ObjectId,
@@ -39,7 +39,7 @@ export const Board = mongoose.model("Board", new mongoose.Schema({
 	},
 }));
 
-export const Post = mongoose.model("Post", new mongoose.Schema({
+export const PostModel = mongoose.model("Post", new mongoose.Schema({
 	post_title: mongoose.SchemaTypes.String,
 	post_content: mongoose.SchemaTypes.String,
 	board: {
@@ -61,7 +61,7 @@ export const Post = mongoose.model("Post", new mongoose.Schema({
 	}],
 }));
 
-export const Reply = mongoose.model("Reply", new mongoose.Schema({
+export const ReplyModel = mongoose.model("Reply", new mongoose.Schema({
 	reply_content: mongoose.SchemaTypes.String,
 	post: {
 		type: mongoose.SchemaTypes.ObjectId,
