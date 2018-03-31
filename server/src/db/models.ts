@@ -33,10 +33,6 @@ export const BoardModel = mongoose.model("Board", new mongoose.Schema({
 		type: mongoose.SchemaTypes.ObjectId,
 		ref: "Role",
 	}],
-	posts: {
-		type: mongoose.SchemaTypes.ObjectId,
-		ref: "Post",
-	},
 }));
 
 export const PostModel = mongoose.model("Post", new mongoose.Schema({
