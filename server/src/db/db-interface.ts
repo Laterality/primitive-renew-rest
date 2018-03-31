@@ -1,6 +1,6 @@
+import { BoardDBO } from "./board.dbo";
 import { RoleDBO } from "./role.dbo";
 import { UserDBO } from "./user.dbo";
-import { BoardDBO } from "./board.dbo";
 
 export interface IDatabase {
 
@@ -61,7 +61,7 @@ export interface IDatabase {
 	 * 
 	 * @param title 조회할 role의 role_title
 	 */
-	findRoleByTitle(title: string): Promise<RoleDBO[]>;
+	findRoleByTitle(title: string): Promise<RoleDBO | null>;
 
 	/**
 	 * 모든 role 조회
@@ -89,7 +89,7 @@ export interface IDatabase {
 	 * 게시판 갱신
 	 * @param board 갱신할 게시판
 	 */
-	updateBoard(board: BoardDBO): Promise<BoardDBO>;
+	updateBoard(board: BoardDBO): Promise<void>;
 
 	/**
 	 * 게시판 삭제

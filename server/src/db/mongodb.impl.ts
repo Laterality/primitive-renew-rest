@@ -2,6 +2,8 @@ import * as mongoose from "mongoose";
 
 import { IDatabase } from "./db-interface";
 import * as model from "./models";
+
+import { BoardDBO } from "./board.dbo";
 import { RoleDBO } from "./role.dbo";
 import { UserDBO } from "./user.dbo";
 
@@ -152,10 +154,10 @@ export class MongoDBImpl implements IDatabase {
 	 * 
 	 * @param title 조회할 role의 role_title
 	 */
-	public async findRoleByTitle(title: string): Promise<RoleDBO[]> {
-		const rolesFound = await model.RoleModel.find({role_title: title}).exec();
-
-		return this.rolesDocToDBO(rolesFound);
+	public async findRoleByTitle(title: string): Promise<RoleDBO | null> {
+		const roleFound = await model.RoleModel.findOne({role_title: title}).exec();
+		if (!roleFound) { return null; }
+		return this.roleDocToDBO(roleFound);
 	}
 
 	/**
@@ -165,6 +167,90 @@ export class MongoDBImpl implements IDatabase {
 		const rolesFound = await model.RoleModel.find().exec();
 
 		return this.rolesDocToDBO(rolesFound);
+	}
+	
+	/**
+	 * 게시판 생성
+	 * @param newBoard 생성할 게시판
+	 */
+	public async createBoard(newBoard: BoardDBO): Promise<BoardDBO> {
+
+		const readableRoleIds: string[] = [];
+		const writableRoleIds: string[] = [];
+		for (const role of newBoard.getRolesReadable()) {
+			readableRoleIds.push(role.getId() as string);
+		}
+		for (const role of newBoard.getRolesWritable()) {
+			writableRoleIds.push(role.getId() as string);
+		}
+
+		const board = new model.BoardModel({
+			board_title: newBoard.getTitle(),
+			roles_readable: readableRoleIds,
+			roles_writable: writableRoleIds,
+		});
+
+		await board.save();
+
+		return this.boardDocToDBO(board) as BoardDBO;
+	}
+
+	/**
+	 * id로 게시판 조회
+	 * @param id 조회할 게시판 id
+	 */
+	public async findBoardById(id: string | number): Promise<BoardDBO | null> {
+		const board = await model.BoardModel.findById(id).exec();
+
+		return this.boardDocToDBO(board);
+	}
+
+	/**
+	 * 모든 게시판 목록
+	 */
+	public async findAllBoards(): Promise<BoardDBO[]> {
+		const boards = await model.BoardModel.find().exec();
+
+		return this.boardsDocToDBO(boards);
+	}
+
+	/**
+	 * 게시판 갱신
+	 * @param board 갱신할 게시판
+	 */
+	public async updateBoard(board: BoardDBO): Promise<void> {
+		const boardFound = await model.BoardModel.findById(board.getId()).exec();
+		if (!boardFound) {
+			throw new Error("board not exist");
+		}
+		const readableRoleIds: string[] = [];
+		const writableRoleIds: string[] = [];
+
+		for (const r of board.getRolesReadable()) {
+			readableRoleIds.push(r.getId() as string);
+		}
+		for (const r of board.getRolesWritable()) {
+			writableRoleIds.push(r.getId() as string);
+		}
+
+		(boardFound as any)["board_title"] = board.getTitle();
+		(boardFound as any)["roles_readable"] = readableRoleIds;
+		(boardFound as any)["roles_writable"] = writableRoleIds;
+		await boardFound.save();
+	}
+
+	/**
+	 * 게시판 삭제
+	 * @param board 삭제할 게시판
+	 */
+	public async removeBoard(board: BoardDBO): Promise<void> {
+		const boardFound = await model.BoardModel.findById(board.getId()).exec();
+
+		if (!boardFound) {
+			throw new Error("board not exist");
+		}
+
+		await boardFound.remove();
 	}
 
 	private roleDocToDBO(doc: mongoose.Document | null): RoleDBO | null {
@@ -182,45 +268,6 @@ export class MongoDBImpl implements IDatabase {
 		}
 
 		return roles;
-	}
-	
-	/**
-	 * 게시판 생성
-	 * @param newBoard 생성할 게시판
-	 */
-	public createBoard(newBoard: BoardDBO): Promise<BoardDBO> {
-
-	}
-
-	/**
-	 * id로 게시판 조회
-	 * @param id 조회할 게시판 id
-	 */
-	public findBoardById(id: string | number): Promise<BoardDBO | null> {
-
-	}
-
-	/**
-	 * 모든 게시판 목록
-	 */
-	public findAllBoards(): Promise<BoardDBO[]> {
-
-	}
-
-	/**
-	 * 게시판 갱신
-	 * @param board 갱신할 게시판
-	 */
-	public updateBoard(board: BoardDBO): Promise<BoardDBO> {
-
-	}
-
-	/**
-	 * 게시판 삭제
-	 * @param board 삭제할 게시판
-	 */
-	public removeBoard(board: BoardDBO): Promise<void> {
-		
 	}
 
 	/**
@@ -245,5 +292,23 @@ export class MongoDBImpl implements IDatabase {
 		}
 
 		return users;
+	}
+
+	private boardDocToDBO(doc: mongoose.Document | null): BoardDBO | null {
+		if (doc === null) { return null; }
+
+		return new BoardDBO(
+			(doc as any)["board_title"],
+			this.rolesDocToDBO((doc as any)["roles_readable"]),
+			this.rolesDocToDBO((doc as any)["roles_writable"]),
+			doc._id);
+	}
+
+	private boardsDocToDBO(docs: mongoose.Document[]): BoardDBO[] {
+		const boards: BoardDBO[] = [];
+		for (const doc of docs) {
+			boards.push(this.boardDocToDBO(doc) as BoardDBO);
+		}
+		return boards;
 	}
 }
