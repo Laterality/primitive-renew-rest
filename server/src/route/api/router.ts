@@ -1,12 +1,14 @@
 import * as express from "express";
+
+import { encryption } from "../../lib/auth";
 import * as resHandler from "../../lib/response-handler";
 
 import { IDatabase } from "../../db/db-interface";
 import { V1API } from "./v1/router";
 
+import { BoardDBO } from "../../db/board.dbo";
 import { RoleDBO } from "../../db/role.dbo";
 import { UserDBO } from "../../db/user.dbo";
-import { encryption } from "../../lib/auth";
 
 export class APIRouter {
 	private router: express.Router;
@@ -30,6 +32,17 @@ export class APIRouter {
 			await this.db.createRole(new RoleDBO("재학생"));
 			await this.db.createRole(new RoleDBO("졸업생"));
 			const roleAdmin = await this.db.createRole(new RoleDBO("관리자"));
+
+			// 게시판 생성
+			const seminarPermitted: RoleDBO[] = [];
+			seminarPermitted.push(await this.db.findRoleByTitle("신입생") as RoleDBO);
+			seminarPermitted.push(await this.db.findRoleByTitle("재학생") as RoleDBO);
+			seminarPermitted.push(await this.db.findRoleByTitle("졸업생") as RoleDBO);
+			seminarPermitted.push(await this.db.findRoleByTitle("관리자") as RoleDBO);
+
+			await this.db.createBoard(new BoardDBO("세미나", seminarPermitted, seminarPermitted));
+			await this.db.createBoard(new BoardDBO("과제", seminarPermitted, seminarPermitted));
+			await this.db.createBoard(new BoardDBO("신입생 자료실", seminarPermitted, seminarPermitted));
 
 			// 관리자 계정 생성
 			const authInfo = await encryption("root");
