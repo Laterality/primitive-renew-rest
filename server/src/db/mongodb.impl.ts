@@ -410,6 +410,36 @@ export class MongoDBImpl implements IDatabase {
 	}
 
 	/**
+	 * id로 파일 조회
+	 * @param id 조회할 파일 id
+	 */
+	public async findFileById(id: string | number): Promise<FileDBO> {
+		const fileFound = await model.FileModel.findById(id).exec();
+
+		if (fileFound === null) { throw new Error("not found"); }
+
+		return this.fileDocToDBO(fileFound);
+	}
+
+	/**
+	 * id로 복수 파일 조회
+	 * @param id 조회할 파일 id 배열
+	 */
+	public async findFilesById(id: string[] | number[]): Promise<FileDBO[]> {
+		const oids: mongoose.Types.ObjectId[] = [];
+		for (const strId of id) {
+			oids.push(mongoose.Types.ObjectId(strId));
+		}
+
+		const result = await model.FileModel.find({
+			_id: {
+				$in: oids,
+			}}).exec();
+
+		return this.filesDocToDBO(result);
+	}
+
+	/**
 	 * 파일 삭제
 	 * @param file 삭제할 파일
 	 */

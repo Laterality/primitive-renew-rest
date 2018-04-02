@@ -163,6 +163,18 @@ export interface IDatabase {
 	createFile(file: FileDBO): Promise<FileDBO>;
 
 	/**
+	 * id로 파일 조회
+	 * @param id 조회할 파일 id
+	 */
+	findFileById(id: string | number): Promise<FileDBO>;
+
+	/**
+	 * id로 복수 파일 조회
+	 * @param id 조회할 파일 id 배열
+	 */
+	findFilesById(id: string[] | number[]): Promise<FileDBO[]>;
+
+	/**
 	 * 파일 삭제
 	 * @param file 삭제할 파일
 	 */
