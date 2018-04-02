@@ -1,4 +1,5 @@
 import * as mongoose from "mongoose";
+import * as paginate from "mongoose-paginate";
 
 export const UserModel = mongoose.model("User", new mongoose.Schema({
 	name: mongoose.SchemaTypes.String,
@@ -24,7 +25,10 @@ export const FileModel = mongoose.model("File", new mongoose.Schema({
 }));
 
 export const BoardModel = mongoose.model("Board", new mongoose.Schema({
-	board_title: mongoose.SchemaTypes.String,
+	board_title: {
+		type: mongoose.SchemaTypes.String,
+		unique: true,
+	},
 	roles_readable: [{
 		type: mongoose.SchemaTypes.ObjectId,
 		ref: "Role",
@@ -55,7 +59,7 @@ export const PostModel = mongoose.model("Post", new mongoose.Schema({
 		type: mongoose.SchemaTypes.ObjectId,
 		ref: "Reply",
 	}],
-}));
+}).plugin(paginate));
 
 export const ReplyModel = mongoose.model("Reply", new mongoose.Schema({
 	reply_content: mongoose.SchemaTypes.String,
