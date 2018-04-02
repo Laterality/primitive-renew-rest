@@ -38,9 +38,9 @@ export class MongoDBImpl implements IDatabase {
 			salt: newUser.getSalt(),
 			role: newUser.getRole().getId()}).populate("role");
 
-		await user.save();
+		const userCreated = await user.save();
 
-		return this.userDocToDBO(user);
+		return this.userDocToDBO(userCreated);
 	}
 
 	/**
@@ -138,9 +138,9 @@ export class MongoDBImpl implements IDatabase {
 		const newRole = new model.RoleModel({
 			role_title: role.getTitle()});
 
-		await newRole.save();
+		const roleCreated = await newRole.save();
 
-		return this.roleDocToDBO(newRole) as RoleDBO;
+		return this.roleDocToDBO(roleCreated);
 	}
 
 	/**
@@ -193,9 +193,9 @@ export class MongoDBImpl implements IDatabase {
 			roles_writable: writableRoleIds,
 		});
 
-		await board.save();
+		const boardCreated = await board.save();
 
-		return this.boardDocToDBO(board) as BoardDBO;
+		return this.boardDocToDBO(boardCreated);
 	}
 
 	/**
@@ -381,6 +381,33 @@ export class MongoDBImpl implements IDatabase {
 		if (!replyFound) { throw new Error("not found"); }
 
 		await replyFound.remove();
+	}
+
+	/**
+	 * 파일 생성
+	 * @param file 생성할 파일
+	 */
+	public async createFile(file: FileDBO): Promise<FileDBO> {
+		const newFile = new model.FileModel({
+			filename: file.getFilename(),
+			path: file.getPath(),
+		});
+
+		const fileCreated = await newFile.save();
+
+		return this.fileDocToDBO(fileCreated);
+	}
+
+	/**
+	 * 파일 삭제
+	 * @param file 삭제할 파일
+	 */
+	public async removeFile(file: FileDBO): Promise<void> {
+		const fileFound = await model.FileModel.findById(file.getId()).exec();
+
+		if (!fileFound) { throw new Error("not found"); }
+
+		await fileFound.remove();
 	}
 
 	private roleDocToDBO(doc: mongoose.Document): RoleDBO {
