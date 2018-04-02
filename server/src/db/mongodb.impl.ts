@@ -209,6 +209,17 @@ export class MongoDBImpl implements IDatabase {
 	}
 
 	/**
+	 * 게시판명으로 게시판 조회
+	 * @param title 조회할 게시판명
+	 */
+	public async findBoardByTitle(title: string): Promise<BoardDBO | null> {
+		const boardFound = await model.BoardModel.findOne({board_title: title}).exec();
+		if (boardFound === null) { return null; }
+
+		return this.boardDocToDBO(boardFound);
+	}
+
+	/**
 	 * 모든 게시판 목록
 	 */
 	public async findAllBoards(): Promise<BoardDBO[]> {

@@ -84,6 +84,12 @@ export interface IDatabase {
 	findBoardById(id: string | number): Promise<BoardDBO>;
 
 	/**
+	 * 게시판명으로 게시판 조회
+	 * @param title 조회할 게시판명
+	 */
+	findBoardByTitle(title: string): Promise<BoardDBO | null>;
+
+	/**
 	 * 모든 게시판 목록
 	 */
 	findAllBoards(): Promise<BoardDBO[]>;
