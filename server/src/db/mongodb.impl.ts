@@ -4,6 +4,9 @@ import { IDatabase } from "./db-interface";
 import * as model from "./models";
 
 import { BoardDBO } from "./board.dbo";
+import { FileDBO } from "./file.dbo";
+import { PostDBO } from "./post.dbo";
+import { ReplyDBO } from "./reply.dbo";
 import { RoleDBO } from "./role.dbo";
 import { UserDBO } from "./user.dbo";
 
@@ -27,7 +30,7 @@ export class MongoDBImpl implements IDatabase {
 	 * 회원 생성
 	 * @param newUser 생성할 회원
 	 */
-	public async createUser(newUser: UserDBO): Promise<UserDBO | null> {
+	public async createUser(newUser: UserDBO): Promise<UserDBO> {
 		const user = new model.UserModel({
 			name: newUser.getName(),
 			sid: newUser.getSID(),
@@ -43,9 +46,9 @@ export class MongoDBImpl implements IDatabase {
 	/**
 	 * id로 회원을 조회
 	 */
-	public async findUserById(id: string | number): Promise<UserDBO | null> {
+	public async findUserById(id: string | number): Promise<UserDBO> {
 		const userFound = await model.UserModel.findById(id).exec();
-		
+		if (!userFound) { throw new Error("not found"); }
 		return this.userDocToDBO(userFound);
 	}
 
@@ -53,9 +56,9 @@ export class MongoDBImpl implements IDatabase {
 	 * sid로 회원을 조회
 	 * @param sid 
 	 */
-	public async findUserBySID(sid: string): Promise<UserDBO | null> {
+	public async findUserBySID(sid: string): Promise<UserDBO> {
 		const userFound = await model.UserModel.findOne({sid}).populate("role").exec();
-
+		if (!userFound) { throw new Error("not found"); }
 		return this.userDocToDBO(userFound);
 	}
 
@@ -99,7 +102,7 @@ export class MongoDBImpl implements IDatabase {
 		const userFound = await model.UserModel.findById(user.getId()).exec();
 
 		if (!userFound) {
-			throw new Error("user not exist");
+			throw new Error("not found");
 		}
 		else {
 			(userFound as any)["name"] = user.getName();
@@ -120,7 +123,7 @@ export class MongoDBImpl implements IDatabase {
 		const userFound = await model.UserModel.findById(user).exec();
 
 		if (!userFound) {
-			throw new Error("user not exist");
+			throw new Error("not found");
 		}
 		else {
 			await userFound.remove();
@@ -144,9 +147,9 @@ export class MongoDBImpl implements IDatabase {
 	 * 
 	 * @param id 조회할 role의 id
 	 */
-	public async findRoleById(id: string): Promise<RoleDBO | null> {
+	public async findRoleById(id: string): Promise<RoleDBO> {
 		const roleFound = await model.RoleModel.findById(id).exec();
-
+		if (!roleFound) { throw new Error("not found"); }
 		return this.roleDocToDBO(roleFound);
 	}
 
@@ -154,9 +157,9 @@ export class MongoDBImpl implements IDatabase {
 	 * 
 	 * @param title 조회할 role의 role_title
 	 */
-	public async findRoleByTitle(title: string): Promise<RoleDBO | null> {
+	public async findRoleByTitle(title: string): Promise<RoleDBO> {
 		const roleFound = await model.RoleModel.findOne({role_title: title}).exec();
-		if (!roleFound) { return null; }
+		if (!roleFound) { throw new Error("not found"); }
 		return this.roleDocToDBO(roleFound);
 	}
 
@@ -199,9 +202,9 @@ export class MongoDBImpl implements IDatabase {
 	 * id로 게시판 조회
 	 * @param id 조회할 게시판 id
 	 */
-	public async findBoardById(id: string | number): Promise<BoardDBO | null> {
+	public async findBoardById(id: string | number): Promise<BoardDBO> {
 		const board = await model.BoardModel.findById(id).exec();
-
+		if (!board) { throw new Error("not found"); }
 		return this.boardDocToDBO(board);
 	}
 
@@ -253,8 +256,90 @@ export class MongoDBImpl implements IDatabase {
 		await boardFound.remove();
 	}
 
-	private roleDocToDBO(doc: mongoose.Document | null): RoleDBO | null {
-		if (doc === null) { return null; }
+	/**
+	 * 게시물 생성
+	 * @param post 생성할 게시물
+	 */
+	public async createPost(post: PostDBO): Promise<PostDBO> {
+		const fileIds: string[] = [];
+		const replIds: string[] = [];
+		for (const f of post.getFiles()) {
+			fileIds.push(f.getId() as string);
+		}
+		for (const r of post.getReplies()) {
+			replIds.push(r.getId() as string);
+		}
+		const newPost = new model.PostModel({
+			post_title: post.getTitle(),
+			post_content: post.getContent(),
+			boar: post.getBoard().getId(),
+			files_attached: fileIds,
+			author: post.getAuthor().getId(),
+			date_created: post.getDateCreated(),
+			replies: replIds,
+		});
+
+		const created = await newPost.populate("board").populate("author").populate("replies").save();
+
+		return this.postDocToDBO(created);
+	}
+
+	/**
+	 * 게시물 조회
+	 * @param id 게시물 id
+	 */
+	public async findPostById(id: string | number): Promise<PostDBO> {
+		const postFound = await model.PostModel.findById(id).populate("board").populate("author").polygon("replies").exec();
+
+		if (!postFound) { throw new Error("not found"); }
+		return this.postDocToDBO(postFound);
+	}
+
+	/**
+	 * 게시판 별 게시물 조회
+	 * @param boardId 게시판 id
+	 * @param year 작성 연도
+	 * @param page 조회할 페이지 번호
+	 */
+	public async findPostsByBoard(boardId: string | number, year: number, page: number): Promise<PostDBO[]> {
+		const postsFound = await model.PostModel.find({board: boardId}).populate("board").populate("author").populate("replies").exec();
+
+		return this.postsDocToDBO(postsFound);
+	}
+	
+	/**
+	 * 게시물 갱신
+	 * @param board 갱신될 게시물
+	 */
+	public async updatePost(post: PostDBO): Promise<void> {
+		const postFound = await model.PostModel.findById(post.getId()).exec();
+
+		if (!postFound) { throw new Error("not found"); }
+
+		const fileIds: string[] = [];
+
+		for (const f of post.getFiles()) {
+			fileIds.push(f.getId() as string);
+		}
+
+		(postFound as any)["post_title"] = post.getTitle();
+		(postFound as any)["post_content"] = post.getContent();
+		(postFound as any)["files_attached"] = fileIds;
+	}
+
+	/**
+	 * 게시물 삭제
+	 * @param board 삭제할 게시물
+	 */
+	public async removePost(board: BoardDBO): Promise<void> {
+		const postFound = await model.PostModel.findById(board.getId()).exec();
+		
+		if (!postFound) { throw new Error("not found"); }
+
+		await postFound.remove();
+	}
+
+	private roleDocToDBO(doc: mongoose.Document): RoleDBO {
 		return new RoleDBO(
 			(doc as any)["role_title"],
 			doc._id);
@@ -274,8 +359,7 @@ export class MongoDBImpl implements IDatabase {
 	 * user document를 DBO로 변환
 	 * @param doc DBO로 변환할 user document, 
 	 */
-	private userDocToDBO(doc: mongoose.Document | null): UserDBO | null {
-		if (doc === null) { return null; }
+	private userDocToDBO(doc: mongoose.Document): UserDBO {
 		doc.populate("role");
 		return new UserDBO(
 			(doc as any)["sid"],
@@ -294,8 +378,7 @@ export class MongoDBImpl implements IDatabase {
 		return users;
 	}
 
-	private boardDocToDBO(doc: mongoose.Document | null): BoardDBO | null {
-		if (doc === null) { return null; }
+	private boardDocToDBO(doc: mongoose.Document): BoardDBO {
 
 		return new BoardDBO(
 			(doc as any)["board_title"],
@@ -310,5 +393,67 @@ export class MongoDBImpl implements IDatabase {
 			boards.push(this.boardDocToDBO(doc) as BoardDBO);
 		}
 		return boards;
+	}
+
+	private postDocToDBO(doc: mongoose.Document): PostDBO{
+		const da = doc as any;
+		return new PostDBO(
+			da["post_title"],
+			da["post_content"],
+			this.boardDocToDBO(da["board"]),
+			this.filesDocToDBO(da["files_attached"]),
+			this.userDocToDBO(da["author"]),
+			da["date_created"],
+			this.repliesDocToDBO(da["replies"]),
+			da["_id"],
+		);
+	}
+
+	private postsDocToDBO(docs: mongoose.Document[]): PostDBO[] {
+		const dbos: PostDBO[] = [];
+		for (const p of docs) {
+			dbos.push(this.postDocToDBO(p));
+		}
+
+		return dbos;
+	}
+
+	private fileDocToDBO(doc: mongoose.Document): FileDBO {
+		const da = doc as any;
+		return new FileDBO(
+			da["filename"],
+			da["path"],
+			da["_id"],
+		);
+	}
+
+	private filesDocToDBO(docs: mongoose.Document[]): FileDBO[] {
+		const files: FileDBO[] = [];
+
+		for (const f of docs) {
+			files.push(this.fileDocToDBO(f));
+		}
+
+		return files;
+	}
+
+	private replyDocToDBO(doc: mongoose.Document): ReplyDBO {
+		const da = doc as any;
+		return new ReplyDBO(
+			da["reply_content"],
+			this.postDocToDBO(da["post"]) as PostDBO,
+			this.userDocToDBO(da["author"]) as UserDBO,
+			da["date_created"],
+			da["_id"],
+		);
+	}
+
+	private repliesDocToDBO(docs: mongoose.Document[]): ReplyDBO[] {
+		const replies: ReplyDBO[] = [];
+		for (const r of docs) {
+			replies.push(this.replyDocToDBO(r));
+		}
+
+		return replies;
 	}
 }

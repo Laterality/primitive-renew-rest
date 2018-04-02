@@ -1,4 +1,5 @@
 import { BoardDBO } from "./board.dbo";
+import { PostDBO } from "./post.dbo";
 import { RoleDBO } from "./role.dbo";
 import { UserDBO } from "./user.dbo";
 
@@ -8,18 +9,18 @@ export interface IDatabase {
 	 * 회원 생성
 	 * @param newUser 생성할 회원
 	 */
-	createUser(newUser: UserDBO): Promise<UserDBO | null>;
+	createUser(newUser: UserDBO): Promise<UserDBO>;
 
 	/**
 	 * id로 회원을 조회
 	 */
-	findUserById(id: string | number): Promise<UserDBO | null>;
+	findUserById(id: string | number): Promise<UserDBO>;
 
 	/**
 	 * sid로 회원을 조회
 	 * @param sid 
 	 */
-	findUserBySID(sid: string): Promise<UserDBO | null>;
+	findUserBySID(sid: string): Promise<UserDBO>;
 
 	/**
 	 * 모든 회원을 조회
@@ -49,19 +50,19 @@ export interface IDatabase {
 	 * 역할 생성
 	 * @param role 생성할 역할
 	 */
-	createRole(role: RoleDBO): Promise<RoleDBO | null>;
+	createRole(role: RoleDBO): Promise<RoleDBO>;
 
 	/**
 	 * 
 	 * @param id 조회할 role의 id
 	 */
-	findRoleById(id: string): Promise<RoleDBO | null>;
+	findRoleById(id: string): Promise<RoleDBO>;
 
 	/**
 	 * 
 	 * @param title 조회할 role의 role_title
 	 */
-	findRoleByTitle(title: string): Promise<RoleDBO | null>;
+	findRoleByTitle(title: string): Promise<RoleDBO>;
 
 	/**
 	 * 모든 role 조회
@@ -78,7 +79,7 @@ export interface IDatabase {
 	 * id로 게시판 조회
 	 * @param id 조회할 게시판 id
 	 */
-	findBoardById(id: string | number): Promise<BoardDBO | null>;
+	findBoardById(id: string | number): Promise<BoardDBO>;
 
 	/**
 	 * 모든 게시판 목록
@@ -96,4 +97,36 @@ export interface IDatabase {
 	 * @param board 삭제할 게시판
 	 */
 	removeBoard(board: BoardDBO): Promise<void>;
+
+	/**
+	 * 게시물 생성
+	 * @param post 생성할 게시물
+	 */
+	createPost(post: PostDBO): Promise<PostDBO>;
+
+	/**
+	 * 게시물 조회
+	 * @param id 게시물 id
+	 */
+	findPostById(id: string | number): Promise<PostDBO>;
+
+	/**
+	 * 게시판 별 게시물 조회
+	 * @param boardId 게시판 id
+	 * @param year 작성 연도
+	 * @param page 조회할 페이지 번호
+	 */
+	findPostsByBoard(boardId: string | number, year: number, page: number): Promise<PostDBO[]>;
+	
+	/**
+	 * 게시물 갱신
+	 * @param board 갱신될 게시물
+	 */
+	updatePost(post: PostDBO): Promise<void>;
+
+	/**
+	 * 게시물 삭제
+	 * @param board 삭제할 게시물
+	 */
+	removePost(board: BoardDBO): Promise<void>;
 }
