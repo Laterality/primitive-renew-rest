@@ -1,5 +1,6 @@
 import { BoardDBO } from "./board.dbo";
 import { PostDBO } from "./post.dbo";
+import { ReplyDBO } from "./reply.dbo";
 import { RoleDBO } from "./role.dbo";
 import { UserDBO } from "./user.dbo";
 
@@ -129,4 +130,22 @@ export interface IDatabase {
 	 * @param board 삭제할 게시물
 	 */
 	removePost(board: BoardDBO): Promise<void>;
+
+	/**
+	 * 댓글 생성
+	 * @param reply 생성할 댓글
+	 */
+	createReply(reply: ReplyDBO): Promise<ReplyDBO>;
+
+	/**
+	 * 댓글 수정
+	 * @param reply 갱신할 댓글
+	 */
+	updateReply(reply: ReplyDBO): Promise<void>;
+
+	/**
+	 * 댓글 삭제
+	 * @param reply 삭제할 댓글
+	 */
+	removeReply(reply: ReplyDBO): Promise<void>;
 }

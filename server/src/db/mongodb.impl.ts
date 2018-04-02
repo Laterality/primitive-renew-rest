@@ -302,7 +302,7 @@ export class MongoDBImpl implements IDatabase {
 	 * @param page 조회할 페이지 번호
 	 */
 	public async findPostsByBoard(boardId: string | number, year: number, page: number): Promise<PostDBO[]> {
-		const postsFound = await model.PostModel.find({board: boardId}).populate("board").populate("author").populate("replies").exec();
+		const postsFound = await model.PostModel.find({board: boardId}).populate("board").populate("author").populate("replies").populate("replies.author").exec();
 
 		return this.postsDocToDBO(postsFound);
 	}
@@ -337,6 +337,50 @@ export class MongoDBImpl implements IDatabase {
 		if (!postFound) { throw new Error("not found"); }
 
 		await postFound.remove();
+	}
+
+	/**
+	 * 댓글 생성
+	 * @param reply 생성할 댓글
+	 */
+	public async createReply(reply: ReplyDBO): Promise<ReplyDBO> {
+		
+		const replyCreated = new model.ReplyModel({
+			reply_content: reply.getContent(),
+			post: reply.getPost().getId(),
+			author: reply.getAuthor().getId(),
+			date_created: reply.getDateCreated(),
+		});
+
+		await replyCreated.populate("post").populate("author").save();
+
+		return this.replyDocToDBO(replyCreated);
+	}
+
+	/**
+	 * 댓글 수정
+	 * @param reply 갱신할 댓글
+	 */
+	public async updateReply(reply: ReplyDBO): Promise<void> {
+		const replyFound = await model.ReplyModel.findById(reply.getId()).exec();
+
+		if (!replyFound) { throw new Error("not found"); }
+
+		(replyFound as any)["reply_content"] = reply.getContent();
+
+		await replyFound.save();
+	}
+
+	/**
+	 * 댓글 삭제
+	 * @param reply 삭제할 댓글
+	 */
+	public async removeReply(reply: ReplyDBO): Promise<void> {
+		const replyFound = await model.ReplyModel.findById(reply.getId()).exec();
+		
+		if (!replyFound) { throw new Error("not found"); }
+
+		await replyFound.remove();
 	}
 
 	private roleDocToDBO(doc: mongoose.Document): RoleDBO {
