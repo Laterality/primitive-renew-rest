@@ -15,6 +15,14 @@ import { UserDBO } from "../db/user.dbo";
  * "unsupported type": serialize가 지원되지 않는 객체입니다.
  */
 export function serialize<T>(dbo: T): any {
+	if (Array.isArray(dbo)) {
+		const res: any[] = [];
+		for (const obj of dbo) {
+			res.push(serialize(obj));
+		}
+
+		return res;
+	}
 	if ( dbo instanceof UserDBO) {
 		return {
 			id: dbo.getId(),
