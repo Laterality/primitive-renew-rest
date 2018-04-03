@@ -24,4 +24,13 @@ export class PostDBO {
 	public getDateCreated() { return this.dateCreated; }
 	public getReplies() { return this.replies; }
 	public getId() { return this.id; }
+
+	public setTitle(title: string) { this.postTitle = title; }
+	public setContent(content: string) { this.postContent = content; }
+	public setExcerpt(limit: number) {
+		if (this.postContent.length > limit) {
+			this.postContent = this.postContent.substring(0, limit) + "...";
+		}
+	}
+	public setFiles(files: FileDBO[]) { this.filesAttached = files; }
 }
