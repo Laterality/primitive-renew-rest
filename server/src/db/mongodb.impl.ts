@@ -300,7 +300,13 @@ export class MongoDBImpl implements IDatabase {
 	 * @param id 게시물 id
 	 */
 	public async findPostById(id: string | number): Promise<PostDBO> {
-		const postFound = await model.PostModel.findById(id).populate("board").populate("author").polygon("replies").exec();
+		const postFound = await model.PostModel.findById(id)
+		.populate("board")
+		.populate("author")
+		.populate("replies")
+		.populate("replies.author")
+		.populate("files_attached")
+		.exec();
 
 		if (!postFound) { throw new Error("not found"); }
 		return this.postDocToDBO(postFound);
@@ -312,10 +318,25 @@ export class MongoDBImpl implements IDatabase {
 	 * @param year 작성 연도
 	 * @param page 조회할 페이지 번호
 	 */
-	public async findPostsByBoard(boardId: string | number, year: number, page: number): Promise<PostDBO[]> {
-		const postsFound = await model.PostModel.find({board: boardId}).populate("board").populate("author").populate("replies").populate("replies.author").exec();
+	public async findPostsByBoard(boardId: string | number, year: number, page: number, limit: number): Promise<PostDBO[]> {
+		const dateFrom = new Date(year, 1, 1);
+		const dateTo = new Date(year + 1, 1, 1);
+		const query = model.PostModel.find({
+			board: boardId,
+			date_created: {
+				$gte: dateFrom,
+				$lt: dateTo,
+			},
+		}, {
+			post_title: true,
+			post_content: true,
+			date_created: true,
+			author: true,
+		})
+		.populate("author");
+		const postsFound = await model.PostModel.paginate(query, {page, limit});
 
-		return this.postsDocToDBO(postsFound);
+		return this.postsDocToDBO(postsFound.docs);
 	}
 	
 	/**

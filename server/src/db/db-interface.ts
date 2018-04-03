@@ -123,8 +123,9 @@ export interface IDatabase {
 	 * @param boardId 게시판 id
 	 * @param year 작성 연도
 	 * @param page 조회할 페이지 번호
+	 * @param limit 페이지 당 게시물 수
 	 */
-	findPostsByBoard(boardId: string | number, year: number, page: number): Promise<PostDBO[]>;
+	findPostsByBoard(boardId: string | number, year: number, page: number, limit: number): Promise<PostDBO[]>;
 	
 	/**
 	 * 게시물 갱신
@@ -176,6 +177,7 @@ export interface IDatabase {
 
 	/**
 	 * 파일 삭제
+	 * TODO: 더이상 사용되지 않는 파일은 서버에서 제거하도록 해야 함
 	 * @param file 삭제할 파일
 	 */
 	removeFile(file: FileDBO): Promise<void>;
