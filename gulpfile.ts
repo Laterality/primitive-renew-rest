@@ -20,7 +20,7 @@ gulp.task("build-server", () => {
 gulp.task("test", () => {
 	const arr = JSON.parse(fs.readFileSync("./server/src/test/tests.json", "utf-8"));
 	const tests = [];
-	for(const t in arr) {
+	for (const t in arr) {
 		if (arr[t]) {
 			tests.push(`./server/build/test/${t}.test.js`);
 		}

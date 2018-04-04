@@ -10,6 +10,9 @@ export class ReplyAPI {
 
 	public constructor(private db: IDatabase) {
 		this.router = express.Router();
+		this.router.post("/write", this.createReply);
+		this.router.put("/update/:replyId", this.updateReply);
+		this.router.delete("/delete/:replyId", this.deleteReply);
 	}
 
 	public getRouter() {
@@ -111,7 +114,7 @@ export class ReplyAPI {
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_FORBIDDEN,
 					resHandler.ApiResponse.RESULT_FAIL,
-					
+
 				));
 		}
 	}
