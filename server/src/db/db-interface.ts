@@ -146,6 +146,12 @@ export interface IDatabase {
 	createReply(reply: ReplyDBO): Promise<ReplyDBO>;
 
 	/**
+	 * 댓글 조회
+	 * @param id 조회할 댓글 id
+	 */
+	findReplyById(id: string | number): Promise<ReplyDBO>;
+
+	/**
 	 * 댓글 수정
 	 * @param reply 갱신할 댓글
 	 */

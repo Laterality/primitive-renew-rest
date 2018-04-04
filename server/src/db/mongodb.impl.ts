@@ -377,16 +377,39 @@ export class MongoDBImpl implements IDatabase {
 	 */
 	public async createReply(reply: ReplyDBO): Promise<ReplyDBO> {
 		
-		const replyCreated = new model.ReplyModel({
+		const replyNew = new model.ReplyModel({
 			reply_content: reply.getContent(),
 			post: reply.getPost().getId(),
 			author: reply.getAuthor().getId(),
 			date_created: reply.getDateCreated(),
 		});
 
-		await replyCreated.populate("post").populate("author").save();
+		const postFound = await model.PostModel.findById(reply.getPost().getId()).exec();
+
+		if (!postFound) { throw new Error("not found"); }
+
+		const replyCreated = await replyNew.populate("post").populate("author").save();
+
+		(postFound as any)["replies"].push(replyCreated._id);
+
+		await postFound.save();
 
 		return this.replyDocToDBO(replyCreated);
+	}
+
+	/**
+	 * 댓글 조회
+	 * @param id 조회할 댓글 id
+	 */
+	public async findReplyById(id: string | number): Promise<ReplyDBO> {
+		const replyFound = await model.ReplyModel.findById(id)
+		.populate("post")
+		.populate("author")
+		.exec();
+
+		if (!replyFound) { throw new Error("not found"); }
+
+		return this.replyDocToDBO(replyFound);
 	}
 
 	/**
@@ -400,6 +423,8 @@ export class MongoDBImpl implements IDatabase {
 
 		(replyFound as any)["reply_content"] = reply.getContent();
 
+		const postFound = model.PostModel.findById(reply.getPost().getId());
+
 		await replyFound.save();
 	}
 
@@ -411,6 +436,14 @@ export class MongoDBImpl implements IDatabase {
 		const replyFound = await model.ReplyModel.findById(reply.getId()).exec();
 		
 		if (!replyFound) { throw new Error("not found"); }
+
+		const postFound = await model.PostModel.findById(reply.getPost().getId());
+
+		if (!postFound) {
+			throw new Error("not found");
+		}
+
+		(postFound as any)["replies"].pull({_id: reply.getId()});
 
 		await replyFound.remove();
 	}
