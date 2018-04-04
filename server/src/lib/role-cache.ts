@@ -1,3 +1,9 @@
+/**
+ * Role object cache storage class
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-29
+ */
 import * as mongoose from "mongoose";
 
 import { IDatabase } from "../db/db-interface";

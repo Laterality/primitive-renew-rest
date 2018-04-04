@@ -1,9 +1,15 @@
+/**
+ * File upload handler
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-26
+ */
 import * as fs from "fs";
 import * as multer from "multer";
 import * as path from "path";
 
 import { config } from "../config";
-import * as model from "../db/model";
+import * as model from "../db/models";
 
 export const upload = multer({
 	dest: path.join(__dirname, config.path_public, "img"),

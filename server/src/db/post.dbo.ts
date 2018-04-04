@@ -1,3 +1,9 @@
+/**
+ * Post object for database layer abstraction
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-04-02
+ */
 import { BoardDBO } from "./board.dbo";
 import { FileDBO } from "./file.dbo";
 import { ReplyDBO } from "./reply.dbo";

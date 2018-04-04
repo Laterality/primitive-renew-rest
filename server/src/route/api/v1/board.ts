@@ -1,3 +1,9 @@
+/**
+ * Board API V1
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-29
+ */
 import * as express from "express";
 
 import * as resHandler from "../../../lib/response-handler";

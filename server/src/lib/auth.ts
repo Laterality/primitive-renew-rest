@@ -1,3 +1,9 @@
+/**
+ * Authentication helper
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-26
+ */
 import * as bcrypt from "bcrypt-nodejs";
 
 // tuple with hashed password and salt

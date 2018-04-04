@@ -1,3 +1,9 @@
+/**
+ * Express session handling helper
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-29
+ */
 import * as express from "express";
 
 import { IDatabase } from "../db/db-interface";

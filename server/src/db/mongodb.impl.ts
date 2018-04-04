@@ -1,3 +1,9 @@
+/**
+ * Implementation of DB interface for mongodb
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-29
+ */
 import * as mongoose from "mongoose";
 
 import { IDatabase } from "./db-interface";

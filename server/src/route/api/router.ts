@@ -1,3 +1,9 @@
+/**
+ * API version router
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-26
+ */
 import * as express from "express";
 
 import { encryption } from "../../lib/auth";

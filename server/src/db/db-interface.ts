@@ -1,3 +1,9 @@
+/**
+ * Database interface for database layer abstraction
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-29
+ */
 import { BoardDBO } from "./board.dbo";
 import { FileDBO } from "./file.dbo";
 import { PostDBO } from "./post.dbo";

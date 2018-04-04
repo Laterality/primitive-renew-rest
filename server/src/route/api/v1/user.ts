@@ -1,3 +1,9 @@
+/**
+ * User API V1
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-26
+ */
 import * as express from "express";
 
 import * as auth from "../../../lib/auth";

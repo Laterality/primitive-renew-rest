@@ -1,3 +1,10 @@
+/**
+ * Server App Entry
+ * 
+ * Author: Jin-woo Shin
+ * Date: 2018-03-26
+ */
+
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import * as session from "express-session";

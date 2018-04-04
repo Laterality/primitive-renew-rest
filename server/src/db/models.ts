@@ -1,3 +1,9 @@
+/**
+ * Database schema models for mongoose(mongodb)
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-29
+ */
 import * as mongoose from "mongoose";
 import * as paginate from "mongoose-paginate";
 

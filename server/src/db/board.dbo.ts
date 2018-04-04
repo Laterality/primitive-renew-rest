@@ -1,3 +1,9 @@
+/**
+ * Board object for database layer abstraction
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-29
+ */
 import { PostDBO } from "./post.dbo";
 import { RoleDBO } from "./role.dbo";
 

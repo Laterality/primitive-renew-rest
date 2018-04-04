@@ -1,3 +1,9 @@
+/**
+ * V1 API router
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-26
+ */
 import * as express from "express";
 
 import { IDatabase } from "../../../db/db-interface";

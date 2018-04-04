@@ -1,3 +1,9 @@
+/**
+ * User object for database layer abstraction
+ * 
+ * author: Jin-woo Shin
+ * date: 2018-03-29
+ */
 import { RoleDBO } from "./role.dbo";
 
 export class UserDBO {
