@@ -340,11 +340,11 @@ export class UserAPI {
 	 * @body message { string } 결과 메시지
 	 */
 	private async updateUser(req: express.Request, res: express.Response) {
-		const userId		= req.params["userId"];
-		const pwCurrent		= req.body["current_password"];
-		const pwNew			= req.body["new_password"];
-		const pwNewConfirm	= req.body["new_password_confirm"];
-		const role			= req.body["role"];
+		const userId: string		= req.params["userId"];
+		const pwCurrent: string		= req.body["current_password"];
+		const pwNew: string			= req.body["new_password"];
+		const pwNewConfirm: string	= req.body["new_password_confirm"];
+		const role: string			= req.body["role"];
 
 		if (!req.session) { throw new Error("session not exist"); }
 		if (!req.session["userId"]) {
@@ -387,7 +387,8 @@ export class UserAPI {
 			const currentAuthInfo = await auth.encryption(pwCurrent, userFound.getSalt());
 
 			// 현재 비밀번호 일치하는지 확인
-			if (currentAuthInfo[0] === userFound.getPassword()) {
+			if (currentAuthInfo[0] === userFound.getPassword() &&
+				pwCurrent.length > 0) {
 				// 비밀번호 변경
 				if (pwNew === pwNewConfirm) {
 					const newAuthInfo = await auth.encryption(pwNew, userFound.getSalt());
