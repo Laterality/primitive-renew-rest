@@ -332,7 +332,6 @@ export class UserAPI {
 	 * @param userId { string } 수정할 회원의 _id필드값
 	 * @body current_password { string } 현재 비밀번호
 	 * @body new_password { string } 새 비밀번호
-	 * @body new_password_confirm { string } 새 비밀번호 확인
 	 * @body role { string } 변경할 역할
 	 * 
 	 * Response
@@ -343,7 +342,6 @@ export class UserAPI {
 		const userId: string		= req.params["userId"];
 		const pwCurrent: string		= req.body["current_password"];
 		const pwNew: string			= req.body["new_password"];
-		const pwNewConfirm: string	= req.body["new_password_confirm"];
 		const role: string			= req.body["role"];
 
 		if (!req.session) { throw new Error("session not exist"); }
@@ -390,25 +388,17 @@ export class UserAPI {
 			if (currentAuthInfo[0] === userFound.getPassword() &&
 				pwCurrent.length > 0) {
 				// 비밀번호 변경
-				if (pwNew === pwNewConfirm) {
-					const newAuthInfo = await auth.encryption(pwNew, userFound.getSalt());
+				const newAuthInfo = await auth.encryption(pwNew, userFound.getSalt());
 
-					if (newAuthInfo[0] === currentAuthInfo[0]) {
-						// 현재 비밀번호와 새 비밀번호가 같은 경우
-						return resHandler.response(res, new resHandler.ApiResponse(
-							resHandler.ApiResponse.CODE_INVALID_PARAMETERS,
-							resHandler.ApiResponse.RESULT_FAIL,
-							"new password is same with current password"));
-					}
-
-					userFound.setPassword(pwNew);
-				}
-				else {
+				if (newAuthInfo[0] === currentAuthInfo[0]) {
+					// 현재 비밀번호와 새 비밀번호가 같은 경우
 					return resHandler.response(res, new resHandler.ApiResponse(
 						resHandler.ApiResponse.CODE_INVALID_PARAMETERS,
 						resHandler.ApiResponse.RESULT_FAIL,
-						"new password not matched with confirm"));
+						"new password is same with current password"));
 				}
+
+				userFound.setPassword(pwNew);
 
 				this.db.updateUser(userFound);
 
