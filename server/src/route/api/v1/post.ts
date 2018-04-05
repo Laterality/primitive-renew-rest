@@ -247,10 +247,10 @@ export class PostAPI {
 	 * @body message { sring } 결과 메시지
 	 */
 	private async updatePost(req: express.Request, res: express.Response) {
-		const postId		= req.params["postId"];
-		const postTitle		= req.body["post_title"];
-		const postContent	= req.body["post_content"];
-		const filesAttached	= req.body["files_attached"];
+		const postId: string		= req.params["postId"];
+		const postTitle: string		= req.body["post_title"];
+		const postContent: string	= req.body["post_content"];
+		const filesAttached: string[]	= req.body["files_attached"];
 
 		if (!req.session) { throw new Error("session not exist"); }
 		if (!req.session["userId"]) {
@@ -278,10 +278,10 @@ export class PostAPI {
 			if (filesAttached) {
 				postFound.setFiles(await this.db.findFilesById(filesAttached));
 			}
-			if (postTitle) {
+			if (postTitle && postTitle.length > 0) {
 				postFound.setTitle(postTitle);
 			}
-			if (postContent) {
+			if (postContent && postContent.length > 0) {
 				postFound.setContent(postContent);
 			}
 
