@@ -449,15 +449,14 @@ export class UserAPI {
 					"login needed"));
 		}
 
-		if (!(checkRole(this.db, req, "관리자") ||
-			req.session["userId"] === userId)) {
+		if (!checkRole(this.db, req, "관리자")) {
 				return resHandler.response(res,
 					new resHandler.ApiResponse(
 						resHandler.ApiResponse.CODE_FORBIDDEN,
 						resHandler.ApiResponse.RESULT_FAIL,
 						"unauthorized request"));
-			}
-
+		}
+		
 		try {
 			const userFound = await this.db.findUserById(userId);
 
