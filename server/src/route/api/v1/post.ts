@@ -125,7 +125,7 @@ export class PostAPI {
 	 * Request
 	 * @param pageNum { int } 조회할 페이지 번호
 	 * @query year { int } 조회할 게시물 연도(기본값: 현재 연도)
-	 * @query board { string } 게시판 id
+	 * @query board_title { string } 게시판명
 	 * 
 	 * Response
 	 * @body result { string } 결과
@@ -133,9 +133,9 @@ export class PostAPI {
 	 * @body posts { PostModel[] } 조회된 게시물 목록
 	 */
 	private async retrievePostList(req: express.Request, res: express.Response) {
-		const pageNum	= req.params["pageNum"];
-		const year		= req.query["year"];
-		const boardId	= req.query["board"];
+		const pageNum		= req.params["pageNum"];
+		const year			= req.query["year"];
+		const boardTitle	= req.query["board"];
 
 		if (!req.session) { throw new Error("session not exist"); }
 
@@ -148,8 +148,16 @@ export class PostAPI {
 					"login needed",
 				));
 		}
-
-		const postsFound = await this.db.findPostsByBoard(boardId, year, pageNum, 5);
+		const board = await this.db.findBoardByTitle(boardTitle);
+		if (board === null) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_INVALID_PARAMETERS,
+					resHandler.ApiResponse.RESULT_FAIL,
+					"not found(board)",
+				));
+		}
+		const postsFound = await this.db.findPostsByBoard(board.getId() as string, year, pageNum, 5);
 
 		for (const post of postsFound) {
 			post.setExcerpt(100);
