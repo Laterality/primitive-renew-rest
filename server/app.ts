@@ -31,7 +31,7 @@ app.use(session({
 	saveUninitialized: true,
 }));
 
-app.use(express.static(__dirname + "/../public"));
+app.use(express.static(__dirname + "/../../public"));
 app.use(express.static(config.path_public));
 
 app.use("/api", new APIRouter(db).getRouter());
