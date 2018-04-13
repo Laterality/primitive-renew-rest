@@ -29,6 +29,9 @@ app.use(session({
 	saveUninitialized: true,
 }));
 
+app.use(express.static(__dirname + "/../../public"));
+app.use(express.static(config.path_public));
+
 app.use((req: express.Request, res: express.Response) => {
 	res.status(200);
 	res.send("Server is on");

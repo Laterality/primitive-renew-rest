@@ -51,14 +51,6 @@ export class BoardAPI {
 		const rolesWritable	= req.body["roles_writable"];
 
 		// 권한 검사
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res, 
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed"));
-		}
 		if (!checkRole(this.db, req, "관리자")) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
@@ -133,15 +125,6 @@ export class BoardAPI {
 		const boardId = req.params["boardId"];
 
 		// 권한 검사
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed"));
-		}
-
 		const boardFound = await this.db.findBoardById(boardId);
 
 		if (boardFound === null) {

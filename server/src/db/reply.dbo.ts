@@ -22,4 +22,6 @@ export class ReplyDBO {
 	public getAuthor() { return this.author; }
 	public getDateCreated() { return this.dateCreated; }
 	public getId() { return this.id; }
+
+	public setReplyContent(content: string) { this.replyContent = content; }
 }

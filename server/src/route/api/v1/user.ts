@@ -123,14 +123,6 @@ export class UserAPI {
 	 * @body users { UserModel[] } 사용자 배열
 	 */
 	private async retrieveAllUsers(req: express.Request, res: express.Response) {
-		if (!req.session) { throw new Error("session not exists"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res, 
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed"));
-		}
 		if (!checkRole(this.db, req, ["재학생", "관리자"])) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
@@ -177,17 +169,8 @@ export class UserAPI {
 	private async retrieveUserById(req: express.Request, res: express.Response) {
 		const id = req.params["userId"];
 
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed"));
-		}
-
 		if (!(checkRole(this.db, req, ["재학생", "관리자"]) || 
-			req.session["userId"] === id)) {
+			(req.session as Express.Session)["userId"] === id)) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_FORBIDDEN,
@@ -250,15 +233,6 @@ export class UserAPI {
 		const roleIds: string[]			= [];
 		const rc						= roleCache.RoleCache.getInstance(this.db);
 		let roleTitles: string[] = [];
-
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res, 
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed"));
-		}
 
 		if (!checkRole(this.db, req, ["재학생", "관리자"])) {
 			return resHandler.response(res,
@@ -344,17 +318,8 @@ export class UserAPI {
 		const pwNew: string			= req.body["new_password"];
 		const role: string			= req.body["role"];
 
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed"));
-		}
-
 		if (!(checkRole(this.db, req, "관리자") ||
-			req.session["userId"] === userId)) {
+			(req.session as Express.Session)["userId"] === userId)) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_FORBIDDEN,
@@ -432,14 +397,6 @@ export class UserAPI {
 	private async deleteUser(req: express.Request, res: express.Response) {
 		const userId = req.params["userId"];
 
-		if (!req.session) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed"));
-		}
-
 		if (!checkRole(this.db, req, "관리자")) {
 				return resHandler.response(res,
 					new resHandler.ApiResponse(
@@ -484,8 +441,7 @@ export class UserAPI {
 		const userId = req.body["id"];
 		const pw = req.body["pw"];
 
-		if (!req.session) { throw new Error("session not exist"); }
-		if (req.session["userId"]) {
+		if ((req.session as Express.Session)["userId"]) {
 			return resHandler.response(res, 
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_FORBIDDEN,
@@ -537,14 +493,6 @@ export class UserAPI {
 	 * @body message { string } 결과 메시지
 	 */
 	private async logoutUser(req: express.Request, res: express.Response) {
-		if (!req.session) { throw new Error("session is not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed"));
-		}
 		const prom = new Promise(() => {
 			(req.session as Express.Session).destroy((err: any) => {
 				if (err) {

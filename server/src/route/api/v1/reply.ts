@@ -39,20 +39,10 @@ export class ReplyAPI {
 		const postId = req.params["postId"];
 		const replyContent = req.body["reply_content"];
 
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed",
-				));
-		}
-
 		try {
 			const postFound = await this.db.findPostById(postId);
 			const board = postFound.getBoard();
-			const userFound = await this.db.findUserById(req.session["userId"]);
+			const userFound = await this.db.findUserById((req.session as Express.Session)["userId"]);
 
 			const writableRoleTitles: string[] = [];
 
@@ -114,9 +104,6 @@ export class ReplyAPI {
 		const replyId = req.params["replyId"];
 		const replyContent = req.body["reply_content"];
 
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res, 
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_FORBIDDEN,
 					resHandler.ApiResponse.RESULT_FAIL,
@@ -141,20 +128,10 @@ export class ReplyAPI {
 	private async deleteReply(req: express.Request, res: express.Response) {
 		const replyId = req.params["replyId"];
 
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed",
-				));
-		}
-
 		try {
 			const replyFound = await this.db.findReplyById(replyId);
 
-			if (req.session["userId"] === (replyFound.getAuthor().getId() as string) && 
+			if ((req.session as Express.Session)["userId"] === (replyFound.getAuthor().getId() as string) && 
 				!checkRole(this.db, req, "관리자")) {
 					return resHandler.response(res,
 						new resHandler.ApiResponse(

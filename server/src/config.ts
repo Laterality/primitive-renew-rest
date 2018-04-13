@@ -9,7 +9,7 @@ export const config = {
 		uri: "MONGODB_URI",
 
 	},
-	path_public: "/home/server/apps/public/img", // definite path
+	path_public: "/home/server/apps/public/primitive-web", // definite path
 	test: {
 		baseurl: "http://trailblazer.latera.kr/yd/api/v1",
 	},

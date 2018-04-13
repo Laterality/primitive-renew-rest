@@ -54,8 +54,6 @@ export class PostAPI {
 		const board = req.body["board"];
 		const filesAttached = req.body["files_attached"];
 
-		if (!req.session) { throw new Error("session not exist"); }
-
 		const boardFound = await this.db.findBoardByTitle(board);
 		if (boardFound === null) {
 			// 존재하지 않는 게시판명인경우
@@ -93,7 +91,8 @@ export class PostAPI {
 			}
 		}
 
-		const author = await this.db.findUserById(req.session["userId"]);
+		const author = await this.db.findUserById(
+			(req.session as Express.Session)["userId"]);
 		
 		const postCreated = await this.db.createPost(new PostDBO(
 			postTitle,
@@ -137,17 +136,8 @@ export class PostAPI {
 		const year			= req.query["year"];
 		const boardTitle	= req.query["board"];
 
-		if (!req.session) { throw new Error("session not exist"); }
 
 		// 권한 검사
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed",
-				));
-		}
 		const board = await this.db.findBoardByTitle(boardTitle);
 		if (board === null) {
 			return resHandler.response(res,
@@ -191,17 +181,6 @@ export class PostAPI {
 	 */
 	private async retrievePostById(req: express.Request, res: express.Response) {
 		const postId = req.params["postId"];
-
-		if (!req.session) { throw new Error("session not exist"); }
-
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed",
-				));
-		}
 
 		try {
 			const postFound = await this.db.findPostById(postId);
@@ -252,20 +231,10 @@ export class PostAPI {
 		const postContent: string	= req.body["post_content"];
 		const filesAttached: string[]	= req.body["files_attached"];
 
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed",
-				));
-		}
-
 		try {
 			const postFound = await this.db.findPostById(postId);
 
-			if (req.session["userId"] !== postFound.getAuthor().getId() &&
+			if ((req.session as Express.Session)["userId"] !== postFound.getAuthor().getId() &&
 				!checkRole(this.db, req, "관리자")) {
 					return resHandler.response(res, 
 						new resHandler.ApiResponse(
@@ -321,21 +290,11 @@ export class PostAPI {
 	 */
 	private async deletePost(req: express.Request, res: express.Response) {
 		const postId = req.params["postId"];
-		
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"login needed",
-				));
-		}
 
 		try {
 			const postFound = await this.db.findPostById(postId);
 
-			if (req.session["userId"] !== postFound.getAuthor().getId() &&
+			if ((req.session as Express.Session)["userId"] !== postFound.getAuthor().getId() &&
 				!checkRole(this.db, req, "관리자")) {
 					return resHandler.response(res, 
 						new resHandler.ApiResponse(
