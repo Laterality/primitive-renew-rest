@@ -104,12 +104,26 @@ export class ReplyAPI {
 		const replyId = req.params["replyId"];
 		const replyContent = req.body["reply_content"];
 
+		// 권한 검사
+		const reqplyFound = await this.db.findReplyById(replyId);
+		if (!checkRole(this.db, req, "관리자") || 
+		(req.session as Express.Session)["userId"] !== reqplyFound.getAuthor().getId()) {
+			return resHandler.response(res,
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_FORBIDDEN,
 					resHandler.ApiResponse.RESULT_FAIL,
-
+					"not permitted",
 				));
 		}
+
+		reqplyFound.setReplyContent(replyContent);
+		await this.db.updateReply(reqplyFound);
+
+		return resHandler.response(res,
+			new resHandler.ApiResponse(
+				resHandler.ApiResponse.CODE_OK,
+				resHandler.ApiResponse.RESULT_OK,
+			));
 	}
 
 	/**
