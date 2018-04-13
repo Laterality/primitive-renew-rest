@@ -28,6 +28,8 @@
     "@types/morgan": "^1.7.35",
     "@types/multer": "^1.3.6",
     "@types/node": "^9.6.0",
+    "@types/react": "^16.3.9",
+    "@types/react-dom": "^16.0.5",
     "@types/request-promise-native": "^1.0.14",
     "@types/typescript": "^2.0.0",
     "bcrypt-nodejs": "0.0.3",
@@ -41,12 +43,18 @@
     "morgan": "^1.9.0",
     "multer": "^1.3.0",
     "npm": "^5.7.1",
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1",
     "request-promise-native": "^1.0.5"
   },
   "devDependencies": {
     "@types/chai": "^4.1.2",
     "@types/chai-as-promised": "^7.1.0",
+    "awesome-typescript-loader": "^5.0.0",
     "chai": "^4.1.2",
-    "chai-as-promised": "^7.1.1"
+    "chai-as-promised": "^7.1.1",
+    "source-map-loader": "^0.2.3",
+    "typescript": "^2.8.1",
+    "webpack": "^4.5.0"
   }
 }
