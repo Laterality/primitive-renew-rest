@@ -36,7 +36,7 @@ app.use(express.static(config.path_public));
 
 app.use("/api", new APIRouter(db).getRouter());
 
-app.use((req: express.Request, res:express.Response) => {
+app.use((req: express.Request, res: express.Response) => {
 	return resHandler.response(res,
 		new resHandler.ApiResponse(
 			resHandler.ApiResponse.CODE_NOT_FOUND,
