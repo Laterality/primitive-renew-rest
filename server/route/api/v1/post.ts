@@ -5,6 +5,7 @@
  * date: 2018-04-02
  */
 import * as express from "express";
+import * as fs from "fs";
 
 import { IDatabase } from "../../../db/db-interface";
 import * as resHandler from "../../../lib/response-handler";
@@ -135,7 +136,6 @@ export class PostAPI {
 		const pageNum		= req.params["pageNum"];
 		const year			= req.query["year"];
 		const boardTitle	= req.query["board"];
-
 
 		// 권한 검사
 		const board = await this.db.findBoardByTitle(boardTitle);
@@ -294,6 +294,7 @@ export class PostAPI {
 		try {
 			const postFound = await this.db.findPostById(postId);
 
+			// 권한 검사
 			if ((req.session as Express.Session)["userId"] !== postFound.getAuthor().getId() &&
 				!checkRole(this.db, req, "관리자")) {
 					return resHandler.response(res, 
@@ -303,6 +304,20 @@ export class PostAPI {
 							"not permitted",
 						));
 				}
+
+			// 게시물이 참조하는 파일 삭제
+			for (const f of postFound.getFiles()) {
+				await this.db.removeFile(f);
+				fs.unlinkSync(f.getPath + "/" + f.getFilename());
+			}
+
+			await this.db.removePost(postFound);
+
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_OK,
+					resHandler.ApiResponse.RESULT_OK,
+				));
 		}
 		catch (e) {
 			if (e["message"] === "not found") {

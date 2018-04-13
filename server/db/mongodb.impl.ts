@@ -367,10 +367,10 @@ export class MongoDBImpl implements IDatabase {
 
 	/**
 	 * 게시물 삭제
-	 * @param board 삭제할 게시물
+	 * @param post 삭제할 게시물
 	 */
-	public async removePost(board: BoardDBO): Promise<void> {
-		const postFound = await model.PostModel.findById(board.getId()).exec();
+	public async removePost(post: PostDBO): Promise<void> {
+		const postFound = await model.PostModel.findById(post.getId()).exec();
 		
 		if (!postFound) { throw new Error("not found"); }
 

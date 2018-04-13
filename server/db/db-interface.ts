@@ -141,9 +141,9 @@ export interface IDatabase {
 
 	/**
 	 * 게시물 삭제
-	 * @param board 삭제할 게시물
+	 * @param post 삭제할 게시물
 	 */
-	removePost(board: BoardDBO): Promise<void>;
+	removePost(post: PostDBO): Promise<void>;
 
 	/**
 	 * 댓글 생성
