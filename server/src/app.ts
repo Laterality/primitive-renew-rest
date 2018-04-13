@@ -12,6 +12,8 @@ import * as morgan from "morgan";
 
 import { config } from "./config";
 
+import * as resHandler from "./lib/response-handler";
+
 import { APIRouter } from "./route/api/router";
 
 import { IDatabase } from "./db/db-interface";
@@ -32,13 +34,16 @@ app.use(session({
 app.use(express.static(__dirname + "/../../public"));
 app.use(express.static(config.path_public));
 
-app.use((req: express.Request, res: express.Response) => {
-	res.status(200);
-	res.send("Server is on");
-	res.end();
-});
-
 app.use("/api", new APIRouter(db).getRouter());
+
+app.use((req: express.Request, res:express.Response) => {
+	return resHandler.response(res,
+		new resHandler.ApiResponse(
+			resHandler.ApiResponse.CODE_NOT_FOUND,
+			resHandler.ApiResponse.RESULT_FAIL,
+			"not found",
+		));
+});
 
 app.listen(config.port, (err: Error) => {
 	if (err) {
