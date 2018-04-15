@@ -1,5 +1,7 @@
 module.exports = {
-	entry: "./src/index.tsx",
+	entry: [
+		"./src/index.tsx",
+	],
 	output: {
 		filename: "bundle.js",
 		path: __dirname + "/public/dist"
@@ -15,7 +17,7 @@ module.exports = {
 			{ test: /\.tsx?$/, loader: "awesome-typescript-loader" },
 
 			// All output '.js' files have any sourcemaps re-processed by 'source-map-loader'.
-			{ enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
+			{ enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
 		]
 	},
 

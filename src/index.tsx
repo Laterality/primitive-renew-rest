@@ -6,8 +6,13 @@
  */
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import * as Router from "react-router-dom";
+
+import { App } from "./App";
 
 ReactDOM.render(
-	<h1>Typescript React Stub</h1>,
+	<Router.BrowserRouter>
+		<App/>
+	</Router.BrowserRouter>,
 	document.getElementById("root"),
 );
