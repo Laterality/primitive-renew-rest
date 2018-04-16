@@ -1,5 +1,6 @@
 import * as jquery from "jquery";
 import * as React from "react";
+import * as ReactRouter from "react-router-dom";
 
 export class LoginForm extends React.Component {
 
@@ -14,7 +15,9 @@ export class LoginForm extends React.Component {
 						<input id="password" type="password" className="form-control col" placeholder="Password" aria-label="Password"/>
 					</div>
 				</div>
-				<button type="button" className="btn col" onClick={this.onLoginClicked}>LOGIN</button>
+				<ReactRouter.Link to="/board">
+					<button type="button" className="btn col" onClick={this.onLoginClicked}>LOGIN</button>
+				</ReactRouter.Link>
 			</div>
 		);
 	}

@@ -1,14 +1,16 @@
 import * as React from "react";
 import * as Router from "react-router-dom";
 
-import { Home } from "./pages/home";
+import { BoardPage } from "./pages/board.page";
+import { HomePage } from "./pages/home.page";
 
 export class App extends React.Component {
 
 	public render() {
 		return (
 			<div>
-				<Router.Route exact path="/" component={Home} />
+				<Router.Route exact path="/" component={HomePage} />
+				<Router.Route path="/board" component={BoardPage} />
 			</div>
 		);
 	}
