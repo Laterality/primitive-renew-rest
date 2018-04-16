@@ -11,7 +11,7 @@ export class BoardDBO {
 
 	public constructor(
 		private boardTitle: string,
-		private rolesReadble: RoleDBO[],
+		private rolesReadable: RoleDBO[],
 		private rolesWritable: RoleDBO[],
 		private id?: string | number,
 		private posts: PostDBO[] = []) {
@@ -20,11 +20,11 @@ export class BoardDBO {
 
 	public getId() { return this.id; }
 	public getTitle() { return this.boardTitle; }
-	public getRolesReadable() { return this.rolesReadble; }
+	public getRolesReadable() { return this.rolesReadable; }
 	public getRolesWritable() { return this.rolesWritable; }
 	public getPosts() { return this.posts; }
 	
 	public setTitle(title: string) { this.boardTitle = title; }
-	public setRolesReadable(roles: RoleDBO[]) { this.rolesReadble = roles; }
+	public setRolesReadable(roles: RoleDBO[]) { this.rolesReadable = roles; }
 	public setRolesWritable(roles: RoleDBO[]) { this.rolesWritable = roles; }
 }
