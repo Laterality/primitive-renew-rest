@@ -37,23 +37,23 @@ export function serialize<T>(dbo: T): any {
 			role: dbo.getRole().getTitle(),
 		};
 	}
-	else if (dbo instanceof BoardDBO) {
-		const roleTitlesReadable: string[] = [];
-		const roleTitlesWritable: string[] = [];
-		for (const r of dbo.getRolesReadable()) {
-			roleTitlesReadable.push(r.getTitle());
-		}
-		for (const r of dbo.getRolesWritable()) {
-			roleTitlesWritable.push(r.getTitle());
-		}
+	// else if (dbo instanceof BoardDBO) {
+	// 	const roleTitlesReadable: string[] = [];
+	// 	const roleTitlesWritable: string[] = [];
+	// 	for (const r of dbo.getRolesReadable()) {
+	// 		roleTitlesReadable.push(r.getTitle());
+	// 	}
+	// 	for (const r of dbo.getRolesWritable()) {
+	// 		roleTitlesWritable.push(r.getTitle());
+	// 	}
 
-		return {
-			id: dbo.getId(),
-			board_title: dbo.getTitle(),
-			roles_readable: roleTitlesReadable,
-			roles_writable: roleTitlesWritable,
-		};
-	}
+	// 	return {
+	// 		id: dbo.getId(),
+	// 		board_title: dbo.getTitle(),
+	// 		roles_readable: roleTitlesReadable,
+	// 		roles_writable: roleTitlesWritable,
+	// 	};
+	// }
 	else if (dbo instanceof PostDBO) {
 		const repliesSerialized = [];
 		const filesSerialized = [];
@@ -70,7 +70,7 @@ export function serialize<T>(dbo: T): any {
 			id: dbo.getId(),
 			post_title: dbo.getTitle(),
 			post_content: dbo.getContent(),
-			board: serialize(dbo.getBoard()),
+			board: dbo.getBoard().getTitle(),
 			files_attached: filesSerialized,
 			author: dbo.getAuthor(),
 			date_created: dbo.getDateCreated(),
