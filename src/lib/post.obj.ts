@@ -10,24 +10,24 @@ import { UserObject } from "./user.obj";
 
  export class PostObject {
 
-    public constructor(
-        private title: string,
-        private content: string,
-        private board: string,
-        private author: UserObject,
-        private filesAttached: FileObject[],
-        private dateCreated: Date,
-        private replies?: ReplyObject[],
-        private id?: string | number,
-    ) {}
+	public constructor(
+		private title: string,
+		private content: string,
+		private board: string,
+		private author: UserObject,
+		private filesAttached: FileObject[],
+		private dateCreated: Date,
+		private replies?: ReplyObject[],
+		private id?: string | number,
+	) {}
 
-    public getTitle() { return this.title; }
-    public getContent() { return this.content; }
-    public getBoard() { return this.board; }
-    public getAuthor() { return this.author; }
-    public getFilesAttached() { return this.filesAttached; } 
-    public getDateCreated() { return this.dateCreated; }
-    public getReplies() { return this.replies; }
-    public getId() { return this.id; }
-    
+	public getTitle() { return this.title; }
+	public getContent() { return this.content; }
+	public getBoard() { return this.board; }
+	public getAuthor() { return this.author; }
+	public getFilesAttached() { return this.filesAttached; } 
+	public getDateCreated() { return this.dateCreated; }
+	public getReplies() { return this.replies; }
+	public getId() { return this.id; }
+	
  }
