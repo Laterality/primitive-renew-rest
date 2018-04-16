@@ -22,7 +22,7 @@ gulp.task("test", () => {
 	const tests = [];
 	for (const t in arr) {
 		if (arr[t]) {
-			tests.push(`./server/build/test/${t}.test.js`);
+			tests.push(`./build/server/test/${t}.test.js`);
 		}
 	}
 	// gulp.src("./out/test/*.test.js")

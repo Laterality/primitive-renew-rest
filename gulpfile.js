@@ -16,11 +16,11 @@ gulp.task("build-server", function () {
         .pipe(gulp.dest(tsProject.options.outDir));
 });
 gulp.task("test", function () {
-    var arr = JSON.parse(fs.readFileSync("./server/src/test/tests.json", "utf-8"));
+    var arr = JSON.parse(fs.readFileSync("./server/test/tests.json", "utf-8"));
     var tests = [];
     for (var t in arr) {
         if (arr[t]) {
-            tests.push("./server/build/test/" + t + ".test.js");
+            tests.push("./build/server/test/" + t + ".test.js");
         }
     }
     // gulp.src("./out/test/*.test.js")
