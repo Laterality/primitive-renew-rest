@@ -9,6 +9,7 @@ import * as bodyParser from "body-parser";
 import * as express from "express";
 import * as session from "express-session";
 import * as morgan from "morgan";
+import * as path from "path";
 
 import { config } from "./config";
 
@@ -31,18 +32,22 @@ app.use(session({
 	saveUninitialized: true,
 }));
 
-app.use(express.static(__dirname + "/../../public"));
+app.use(express.static(path.join(__dirname, "./../../public")));
 app.use(express.static(config.path_public));
 
 app.use("/api", new APIRouter(db).getRouter());
-
-app.use((req: express.Request, res: express.Response) => {
+app.use("/api", (req: express.Request, res: express.Response) => {
 	return resHandler.response(res,
 		new resHandler.ApiResponse(
 			resHandler.ApiResponse.CODE_NOT_FOUND,
 			resHandler.ApiResponse.RESULT_FAIL,
 			"not found",
 		));
+});
+
+app.get("/*", (req: express.Request, res: express.Response) => {
+	console.log("send index.html");
+	res.sendFile(path.join(__dirname + "./../../public/index.html"));
 });
 
 app.listen(config.port, (err: Error) => {
