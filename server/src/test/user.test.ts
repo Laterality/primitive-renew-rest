@@ -94,5 +94,4 @@ describe("Test User API", () => {
 			});
 		});
 	});
-
 });
