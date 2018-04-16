@@ -10,6 +10,7 @@ import { IDatabase } from "../../../db/db-interface";
 
 import * as resHandler from "../../../lib/response-handler";
 
+import { AuthAPI } from "./auth";
 import { PostAPI } from "./post";
 import { ReplyAPI } from "./reply";
 import { UserAPI} from "./user";
@@ -20,6 +21,7 @@ export class V1API {
 
 	public constructor(private db: IDatabase) {
 		this.router = express.Router();
+		this.router.use("/auth", new AuthAPI(db).getRouter());
 		this.router.use(this.sessionCheck);
 		this.router.use("/user", new UserAPI(db).getRouter());
 		this.router.use("/post", new PostAPI(db).getRouter());
