@@ -53,7 +53,7 @@ export class FileAPI {
 	 * Request
 	 * @body file { FILE } 업로드할 파일 용량은 20MB 이하
 	 */
-	private uploadFile = (req: express.Request, res: express.Response) => {
+	private uploadFile = async (req: express.Request, res: express.Response) => {
 		try {
 			const fileCreated = await this.db.createFile(new FileDBO(
 				req.file.filename,

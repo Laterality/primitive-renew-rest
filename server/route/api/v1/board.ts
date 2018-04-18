@@ -128,7 +128,7 @@ export class BoardAPI {
 	 * @body message { string } 결과 메시지
 	 * @body board { BoardModel } 조회된 게시판
 	 */
-	private findBoard = (req: express.Request, res: express.Response) => {
+	private findBoard = async (req: express.Request, res: express.Response) => {
 		const boardId = req.params["boardId"];
 
 		try {
