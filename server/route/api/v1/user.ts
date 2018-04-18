@@ -15,12 +15,15 @@ import { checkRole } from "../../../lib/session-handler";
 import { IDatabase } from "../../../db/db-interface";
 import { RoleDBO } from "../../../db/role.dbo";
 import { UserDBO } from "../../../db/user.dbo";
+import { IErrorhandler } from "../../../lib/error-handler.interface";
 
 export class UserAPI {
 
 	private router: express.Router;
 
-	public constructor(private db: IDatabase) {
+	public constructor(
+		private db: IDatabase,
+		private eh: IErrorhandler) {
 		this.router = express.Router();
 		this.router.post("/register", this.registerUser);
 		this.router.get("/users", this.retrieveAllUsers);
@@ -30,9 +33,7 @@ export class UserAPI {
 		this.router.delete("/delete/:userId", this.deleteUser);
 	}
 
-	public getRouter() {
-		return this.router;
-	}
+	public getRouter = () => this.router;
 
 	/**
 	 * 회원 등록
@@ -51,7 +52,7 @@ export class UserAPI {
 	 * @body message { string } 결과 메시지
 	 * @body newUser { UserModel } 생성된 회원
 	 */
-	private async registerUser(req: express.Request, res: express.Response) {
+	private registerUser = async (req: express.Request, res: express.Response) => {
 		const name		= req.body["name"];
 		const sid		= req.body["sid"];
 		const password	= req.body["password"];
@@ -104,7 +105,8 @@ export class UserAPI {
 			}
 		}
 		catch (e) {
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 		
 	}
@@ -120,7 +122,7 @@ export class UserAPI {
 	 * @body message { string } 결과 메시지
 	 * @body users { UserModel[] } 사용자 배열
 	 */
-	private async retrieveAllUsers(req: express.Request, res: express.Response) {
+	private retrieveAllUsers = async (req: express.Request, res: express.Response) => {
 		if (!checkRole(this.db, req, ["재학생", "관리자"])) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
@@ -146,7 +148,8 @@ export class UserAPI {
 				}));
 		}
 		catch (e) {
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
 
@@ -164,7 +167,7 @@ export class UserAPI {
 	 * @body message { string } 결과 메시지
 	 * @body user { UserModel } 검색된 회원
 	 */
-	private async retrieveUserById(req: express.Request, res: express.Response) {
+	private retrieveUserById = async (req: express.Request, res: express.Response) => {
 		const id = req.params["userId"];
 
 		if (!(checkRole(this.db, req, ["재학생", "관리자"]) || 
@@ -205,7 +208,8 @@ export class UserAPI {
 			}
 		}
 		catch (e) {
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
 
@@ -224,7 +228,7 @@ export class UserAPI {
 	 * @body message { string } 결과 메시지
 	 * @body users { UserModel[] } 검색 결과
 	 */
-	private async searchUser(req: express.Request, res: express.Response) {
+	private searchUser = async (req: express.Request, res: express.Response) => {
 		const key: string				= req.params["key"];
 		const usersFound: any[]			= [];
 		const queryRoleTitles: string	= req.query["roles"];
@@ -290,7 +294,8 @@ export class UserAPI {
 			}
 		}
 		catch (e) {
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
 
@@ -310,7 +315,7 @@ export class UserAPI {
 	 * @body result { string } 결과
 	 * @body message { string } 결과 메시지
 	 */
-	private async updateUser(req: express.Request, res: express.Response) {
+	private updateUser = async (req: express.Request, res: express.Response) => {
 		const userId: string		= req.params["userId"];
 		const pwCurrent: string		= req.body["current_password"];
 		const pwNew: string			= req.body["new_password"];
@@ -375,7 +380,8 @@ export class UserAPI {
 			}
 		}
 		catch (e) {
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
 
@@ -392,7 +398,7 @@ export class UserAPI {
 	 * @body result { string } 결과
 	 * @body message { string } 결과 메시지
 	 */
-	private async deleteUser(req: express.Request, res: express.Response) {
+	private deleteUser = async (req: express.Request, res: express.Response) => {
 		const userId = req.params["userId"];
 
 		if (!checkRole(this.db, req, "관리자")) {
@@ -418,7 +424,8 @@ export class UserAPI {
 			return resHandler.response(res, resHandler.createOKResponse());
 		}
 		catch (e) {
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
 }

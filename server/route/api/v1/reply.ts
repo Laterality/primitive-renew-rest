@@ -8,22 +8,24 @@ import * as express from "express";
 
 import { IDatabase } from "../../../db/db-interface";
 import { ReplyDBO } from "../../../db/reply.dbo";
+
+import { IErrorhandler } from "../../../lib/error-handler.interface";
 import * as resHandler from "../../../lib/response-handler";
 import { checkRole } from "../../../lib/session-handler";
 
 export class ReplyAPI {
 	private router: express.Router;
 
-	public constructor(private db: IDatabase) {
+	public constructor(
+		private db: IDatabase,
+		private eh: IErrorhandler) {
 		this.router = express.Router();
 		this.router.post("/write", this.createReply);
 		this.router.put("/update/:replyId", this.updateReply);
 		this.router.delete("/delete/:replyId", this.deleteReply);
 	}
 
-	public getRouter() {
-		return this.router;
-	}
+	public getRouter = () => this.router;
 
 	/**
 	 * 댓글 작성
@@ -35,7 +37,7 @@ export class ReplyAPI {
 	 * @body postId { string } 댓글을 작성할 게시물 id
 	 * @body reply_content { string } 댓글 내용
 	 */
-	private async createReply(req: express.Request, res: express.Response) {
+	private createReply = async (req: express.Request, res: express.Response) => {
 		const postId = req.params["postId"];
 		const replyContent = req.body["reply_content"];
 
@@ -82,7 +84,8 @@ export class ReplyAPI {
 						"not found(post)",
 					));
 			}
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
 
@@ -100,30 +103,36 @@ export class ReplyAPI {
 	 * @body result { string } 결과
 	 * @body message { string } 결과 메시지
 	 */
-	private async updateReply(req: express.Request, res: express.Response) {
+	private updateReply = async (req: express.Request, res: express.Response) => {
 		const replyId = req.params["replyId"];
 		const replyContent = req.body["reply_content"];
 
-		// 권한 검사
-		const reqplyFound = await this.db.findReplyById(replyId);
-		if (!checkRole(this.db, req, "관리자") || 
-		(req.session as Express.Session)["userId"] !== reqplyFound.getAuthor().getId()) {
+		try {
+			// 권한 검사
+			const reqplyFound = await this.db.findReplyById(replyId);
+			if (!checkRole(this.db, req, "관리자") || 
+			(req.session as Express.Session)["userId"] !== reqplyFound.getAuthor().getId()) {
+				return resHandler.response(res,
+					new resHandler.ApiResponse(
+						resHandler.ApiResponse.CODE_FORBIDDEN,
+						resHandler.ApiResponse.RESULT_FAIL,
+						"not permitted",
+					));
+			}
+
+			reqplyFound.setReplyContent(replyContent);
+			await this.db.updateReply(reqplyFound);
+
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_FORBIDDEN,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"not permitted",
+					resHandler.ApiResponse.CODE_OK,
+					resHandler.ApiResponse.RESULT_OK,
 				));
 		}
-
-		reqplyFound.setReplyContent(replyContent);
-		await this.db.updateReply(reqplyFound);
-
-		return resHandler.response(res,
-			new resHandler.ApiResponse(
-				resHandler.ApiResponse.CODE_OK,
-				resHandler.ApiResponse.RESULT_OK,
-			));
+		catch (e) {
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
+		}
 	}
 
 	/**
@@ -139,7 +148,7 @@ export class ReplyAPI {
 	 * @body result { string } 결과
 	 * @body message { string } 결과 메시지
 	 */
-	private async deleteReply(req: express.Request, res: express.Response) {
+	private deleteReply = async (req: express.Request, res: express.Response) => {
 		const replyId = req.params["replyId"];
 
 		try {
@@ -173,7 +182,8 @@ export class ReplyAPI {
 						"not found",
 					));
 			}
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
 }

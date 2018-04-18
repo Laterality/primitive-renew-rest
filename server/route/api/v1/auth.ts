@@ -9,6 +9,7 @@ import * as express from "express";
 import { IDatabase } from "../../../db/db-interface";
 
 import * as auth from "../../../lib/auth";
+import { IErrorhandler } from "../../../lib/error-handler.interface";
 import * as resHandler from "../../../lib/response-handler";
 
 export class AuthAPI {
@@ -17,14 +18,14 @@ export class AuthAPI {
 
 	public constructor(
 		private db: IDatabase,
+		private eh: IErrorhandler,
 	) {
 		this.router = express.Router();
 		this.router.post("/login", this.loginUser);
 		this.router.get("/logout", this.logoutUser);
-
 	}
 
-	public getRouter() { return this.router; }
+	public getRouter = () => this.router;
 
 	/**
 	 * 회원 로그인
@@ -39,7 +40,7 @@ export class AuthAPI {
 	 * Response
 	 * @body result { string } 사용자 
 	 */
-	private async loginUser(req: express.Request, res: express.Response) {
+	private loginUser = async (req: express.Request, res: express.Response) => {
 		const userId = req.body["id"];
 		const pw = req.body["pw"];
 
@@ -80,7 +81,8 @@ export class AuthAPI {
 			}
 		}
 		catch (e) {
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
 
@@ -94,7 +96,7 @@ export class AuthAPI {
 	 * @body result { string } 결과
 	 * @body message { string } 결과 메시지
 	 */
-	private async logoutUser(req: express.Request, res: express.Response) {
+	private logoutUser = async (req: express.Request, res: express.Response) => {
 		if (!req.session) { throw new Error("session not exist"); }
 		if (!req.session["userId"]) {
 			return resHandler.response(res,
@@ -121,7 +123,8 @@ export class AuthAPI {
 				resHandler.ApiResponse.RESULT_OK));
 		}
 		catch (e) {
-			throw e;
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
 }

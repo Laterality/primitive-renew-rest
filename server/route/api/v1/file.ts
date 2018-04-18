@@ -8,11 +8,12 @@ import * as express from "express";
 import * as fs from "fs";
 import * as multer from "multer";
 
+import { IErrorhandler } from "../../../lib/error-handler.interface";
 import * as resHandler from "../../../lib/response-handler";
+import { serialize } from "../../../lib/serializer";
 
 import { IDatabase } from "../../../db/db-interface";
 import { FileDBO } from "../../../db/file.dbo";
-import { serialize } from "../../../lib/serializer";
 
 export class FileAPI {
 	private router: express.Router;
@@ -21,6 +22,7 @@ export class FileAPI {
 	public constructor(
 		private db: IDatabase,
 		fileDest: string,
+		private eh: IErrorhandler,
 	) {
 		this.router = express.Router();
 		const multerStorage = multer.diskStorage({
@@ -34,7 +36,7 @@ export class FileAPI {
 
 	}
 
-	public getRouter() { return this.router; }
+	public getRouter = () => this.router;
 
 	/**
 	 * 파일 업로드
@@ -51,19 +53,25 @@ export class FileAPI {
 	 * Request
 	 * @body file { FILE } 업로드할 파일 용량은 20MB 이하
 	 */
-	private async uploadFile(req: express.Request, res: express.Response) {
-		const fileCreated = await this.db.createFile(new FileDBO(
-			req.file.filename,
-			req.file.path,
-		));
-		return resHandler.response(res,
-			new resHandler.ApiResponse(
-				resHandler.ApiResponse.CODE_OK,
-				resHandler.ApiResponse.RESULT_OK,
-				"",
-				{
-					name: "file",
-					obj: serialize(fileCreated),
-				}));
+	private uploadFile = (req: express.Request, res: express.Response) => {
+		try {
+			const fileCreated = await this.db.createFile(new FileDBO(
+				req.file.filename,
+				req.file.path,
+			));
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_OK,
+					resHandler.ApiResponse.RESULT_OK,
+					"",
+					{
+						name: "file",
+						obj: serialize(fileCreated),
+					}));
+		}
+		catch (e) {
+			this.eh.onError(e);
+			return resHandler.response(res, resHandler.createServerFaultResponse());
+		}
 	}
 }

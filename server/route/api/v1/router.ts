@@ -8,6 +8,7 @@ import * as express from "express";
 
 import { IDatabase } from "../../../db/db-interface";
 
+import { IErrorhandler } from "../../../lib/error-handler.interface";
 import * as resHandler from "../../../lib/response-handler";
 
 import { AuthAPI } from "./auth";
@@ -19,21 +20,21 @@ export class V1API {
 
 	private router: express.Router;
 
-	public constructor(private db: IDatabase) {
+	public constructor(
+		private db: IDatabase,
+		private eh: IErrorhandler) {
 		this.router = express.Router();
-		this.router.use("/auth", new AuthAPI(db).getRouter());
+		this.router.use("/auth", new AuthAPI(db, eh).getRouter());
 		this.router.use(this.sessionCheck);
-		this.router.use("/user", new UserAPI(db).getRouter());
-		this.router.use("/post", new PostAPI(db).getRouter());
-		this.router.use("/reply", new ReplyAPI(db).getRouter());
+		this.router.use("/user", new UserAPI(this.db, this.eh).getRouter());
+		this.router.use("/post", new PostAPI(this.db, this.eh).getRouter());
+		this.router.use("/reply", new ReplyAPI(this.db, this.eh).getRouter());
 	}
 
-	public getRouter() {
-		return this.router;
-	}
+	public getRouter = () => this.router;
 
-	private sessionCheck(req: express.Request, res: express.Response, 
-	next: express.NextFunction) {
+	private sessionCheck = (req: express.Request, res: express.Response, 
+	next: express.NextFunction) => {
 		if (!req.session) { throw new Error("session not exist"); }
 		if (!req.session["userId"]) {
 			return resHandler.response(res,
