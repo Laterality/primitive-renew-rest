@@ -127,4 +127,49 @@ export class AuthAPI {
 			return resHandler.response(res, resHandler.createServerFaultResponse());
 		}
 	}
+
+	/**
+	 * 로그인여부 확인
+	 * 
+	 * path: /check
+	 * method: GET
+	 * 
+	 * Response
+	 * @body result { string } 결과
+	 * @body message { string } 결과 메시지
+	 * @body state { any } 상태
+	 */
+	private isLoggedIn = (req: express.Request, res: express.Response) => {
+		if (!req.session) { throw new Error("session not exist"); }
+
+		if (req.session["userId"]) {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_OK,
+					resHandler.ApiResponse.RESULT_OK,
+					"",
+					{
+						name: "state",
+						obj: {
+							signed: true,
+							id: req.session["userId"],
+						},
+					},
+				));
+		}
+		else {
+			return resHandler.response(res,
+				new resHandler.ApiResponse(
+					resHandler.ApiResponse.CODE_OK,
+					resHandler.ApiResponse.RESULT_OK,
+					"",
+					{
+						name: "state",
+						obj: {
+							signed: false,
+						},
+					},
+				));
+		}
+	}
 }
