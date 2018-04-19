@@ -8,8 +8,10 @@
 import * as bodyParser from "body-parser";
 import * as express from "express";
 import * as session from "express-session";
+import * as helmet from "helmet";
 import * as morgan from "morgan";
 import * as path from "path";
+import * as favicon from "serve-favicon";
 
 import { config } from "./config";
 
@@ -23,10 +25,14 @@ import { InMemoryDB } from "./db/in-memory.impl";
 import { MongoDBImpl } from "./db/mongodb.impl";
 
 const app = express();
-const db = MongoDBImpl.getInstance();
+// const db = MongoDBImpl.getInstance();
 const eh = new ConsoleErrorHandler();
 
 // 미들웨어 세팅
+app.use(helmet());
+app.use(favicon(path.join(__dirname, "./../../public", "favicon.ico")));
+app.use(express.static(path.join(__dirname, "./../../public")));
+app.use(express.static(config.path_public));
 app.use(morgan("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
@@ -34,12 +40,16 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(session({
 	secret: "@#@$MYSIGN#@$#$",
 	resave: false,
-	saveUninitialized: true,
+	saveUninitialized: false,
+	cookie: {
+		secure: false,
+	},
 }));
 
-app.use(express.static(path.join(__dirname, "./../../public")));
-app.use(express.static(config.path_public));
-
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+	console.log("session id: ", req.sessionID);
+	next();
+});
 app.use("/api", new APIRouter(db, eh).getRouter());
 app.use("/api", (req: express.Request, res: express.Response) => {
 	return resHandler.response(res,
@@ -51,7 +61,6 @@ app.use("/api", (req: express.Request, res: express.Response) => {
 });
 
 app.get("/*", (req: express.Request, res: express.Response) => {
-	console.log("send index.html");
 	res.sendFile(path.join(__dirname + "./../../public/index.html"));
 });
 
