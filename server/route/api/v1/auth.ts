@@ -79,6 +79,15 @@ export class AuthAPI {
 					resHandler.ApiResponse.CODE_OK,
 					resHandler.ApiResponse.RESULT_OK));
 			}
+			else {
+				// 비밀번호 불일치
+				return resHandler.response(res, 
+					new resHandler.ApiResponse(
+						resHandler.ApiResponse.CODE_INVALID_PARAMETERS,
+						resHandler.ApiResponse.RESULT_FAIL,
+						"password incorrect",
+					));
+			}
 		}
 		catch (e) {
 			this.eh.onError(e);
