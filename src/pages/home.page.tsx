@@ -6,7 +6,7 @@ export class HomePage extends React.Component {
 
 	public render() {
 		return (
-			<LoginForm/>
+			<LoginForm />
 		);
 	}
 }
