@@ -26,6 +26,7 @@ import { MongoDBImpl } from "./db/mongodb.impl";
 
 const app = express();
 // const db = MongoDBImpl.getInstance();
+const db = new InMemoryDB();
 const eh = new ConsoleErrorHandler();
 
 // 미들웨어 세팅
