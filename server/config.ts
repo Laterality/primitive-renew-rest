@@ -1,5 +1,6 @@
 export const config = {
 	port: 3100,
+	url: "http://localhost:3100",
 	https: {
 		use: false,
 		key: "PATH_TO_PRIVATE_KEY",
