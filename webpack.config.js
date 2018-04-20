@@ -36,8 +36,8 @@ module.exports = {
 	// dpendencies, which allows browsers to cahce those libraries between builds.
 	externals: {
 		"react": "React",
-		"react-dome": "ReactDOM",
-		"axios": "Axios"
+		"react-dom": "ReactDOM",
+		"axios": "axios"
 	}
 }
 
