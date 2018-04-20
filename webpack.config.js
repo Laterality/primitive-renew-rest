@@ -1,4 +1,7 @@
+const path = require("path");
+
 module.exports = {
+	mode: "development",
 	entry: [
 		"./src/index.tsx",
 	],
@@ -14,7 +17,13 @@ module.exports = {
 	module: {
 		rules: [
 			// All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-			{ test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+			{
+				test: /\.tsx?$/, 
+				loader: "awesome-typescript-loader",
+				exclude: [
+					path.resolve(__dirname, "/server"),
+				]
+			},
 
 			// All output '.js' files have any sourcemaps re-processed by 'source-map-loader'.
 			{ enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
@@ -27,7 +36,8 @@ module.exports = {
 	// dpendencies, which allows browsers to cahce those libraries between builds.
 	externals: {
 		"react": "React",
-		"react-dome": "ReactDOM"
-	},
+		"react-dome": "ReactDOM",
+		"axios": "Axios"
+	}
 }
 
