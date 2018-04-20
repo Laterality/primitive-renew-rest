@@ -9,7 +9,7 @@ export class App extends React.Component {
 
 	public render() {
 		return (
-			<div>
+			<div className="router-wrapper">
 				<Router.Route exact path="/" component={HomePage} />
 				<Router.Route path="/board" component={BoardPage} />
 				<Router.Route path="/write" component={WritePostPage} />

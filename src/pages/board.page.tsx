@@ -51,7 +51,7 @@ export class BoardPage extends React.Component<IBoardPageProps, {location: any, 
 
 	private onLogout = () => {
 		reqUser.UserAPIRequest.logoutUser()
-		.then((res: axios.AxiosResponse) => {
+		.then(async (res: axios.AxiosResponse) => {
 			const body = res.data;
 			if (body["result"] === "ok") {
 				alert("로그아웃되었습니다.");
