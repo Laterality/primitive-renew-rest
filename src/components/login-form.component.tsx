@@ -1,6 +1,7 @@
 import * as jquery from "jquery";
 import * as PropTypes from "prop-types";
 import * as React from "react";
+import * as ReactDOM from "react-dom";
 import * as ReactRouter from "react-router-dom";
 
 import * as axios from "axios";
@@ -13,29 +14,47 @@ export class LoginForm extends React.Component {
 		router: PropTypes.object.isRequired,
 	};
 
-	public render() {
+	public constructor(props: never) {
+		super(props);
+	}
+
+	public componentDidMount() {
+		const usernameLabel = ReactDOM.findDOMNode(this.refs["usernameLabel"]);
+		const passwordLabel = ReactDOM.findDOMNode(this.refs["passwordLabel"]);
+		if (usernameLabel) {
+			jquery(usernameLabel).attr("for", "username");
+		}
+		if (passwordLabel) {
+			jquery(passwordLabel).attr("for", "password");
+		}
 		// 세션 검사해서 로그인여부 확인
 		reqUser.UserAPIRequest.checkSignedIn()
 		.then(async (res: axios.AxiosResponse) => {
-			// const body = await res.json();
 			const body = res.data;
+
 			if (body["state"]["signed"] === true) {
 				alert("이미 로그인되어있습니다.");
 				this.context["router"]["history"]["push"]("/board");
 			}
 		});
+	}
 
+	public render() {
 		return (
 			<div className="container">
-				<div className="col">
-					<div className="input-group row">
-						<input id="username" type="text" className="form-control col" placeholder="ID" aria-label="Username"/>
+			<div className="row">
+				<form className="col">
+					<div className="form-group">
+						<label ref="usernameLabel">ID</label>
+						<input id="username" type="text" className="form-control" placeholder="학번" aria-label="Username"/>
 					</div>
-					<div className="input-group row">
-						<input id="password" type="password" className="form-control col" placeholder="Password" aria-label="Password"/>
+					<div className="form-group">
+						<label ref="passwordLabel">PW</label>
+						<input id="password" type="password" className="form-control" placeholder="Password" aria-label="Password"/>
 					</div>
+				</form>
+				<button type="submit" className="btn text-white bg-primary col-2 my-5 mx-3 px-2" onClick={this.onLoginClicked}>LOGIN</button>
 				</div>
-				<button type="button" className="btn col" onClick={this.onLoginClicked}>LOGIN</button>
 			</div>
 		);
 	}
@@ -47,8 +66,8 @@ export class LoginForm extends React.Component {
 		console.log("PW: " + pw);
 		reqUser.UserAPIRequest.loginUser(id as string, pw as string)
 		.then(async (res: axios.AxiosResponse) => {
-			// const body = await res.json();
 			const body = res.data;
+			console.log(body);
 			if (body["result"] === "ok") {
 				// 로그인 성공
 				this.context["router"]["history"]["push"]("/board");
