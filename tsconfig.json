@@ -57,6 +57,7 @@
   "exclude": [
 	"out",
 	"node_modules",
-	"gulpfile.ts"
+	"gulpfile.ts",
+	"src"
   ]
 }
