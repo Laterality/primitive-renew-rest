@@ -3,6 +3,7 @@ exports.__esModule = true;
 var fs = require("fs");
 var gulp = require("gulp");
 var mocha = require("gulp-mocha");
+var sourcemaps = require("gulp-sourcemaps");
 var ts = require("gulp-typescript");
 gulp.task("default", function () {
     // Doing nothing
@@ -11,8 +12,10 @@ gulp.task("default", function () {
 gulp.task("build-server", function () {
     var tsProject = ts.createProject("tsconfig.json");
     return tsProject.src()
+        .pipe(sourcemaps.init())
         .pipe(tsProject())
         .js
+        .pipe(sourcemaps.write("."))
         .pipe(gulp.dest(tsProject.options.outDir));
 });
 gulp.task("test", function () {

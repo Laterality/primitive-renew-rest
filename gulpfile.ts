@@ -1,7 +1,9 @@
 import * as fs from "fs";
 import * as gulp from "gulp";
 import * as mocha from "gulp-mocha";
+import * as sourcemaps from "gulp-sourcemaps";
 import * as ts from "gulp-typescript";
+import * as path from "path";
 
 gulp.task("default", () => {
 	// Doing nothing
@@ -12,8 +14,10 @@ gulp.task("build-server", () => {
 	const tsProject = ts.createProject("tsconfig.json");
 	
 	return tsProject.src()
+	.pipe(sourcemaps.init())
 	.pipe(tsProject())
 	.js
+	.pipe(sourcemaps.write("."))
 	.pipe(gulp.dest(tsProject.options.outDir as string));
 });
 
