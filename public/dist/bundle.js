@@ -16532,6 +16532,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Login form component
+ *
+ * author: Jinwoo Shin
+ * date: 2018-04-20
+ */
 const jquery = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
 const PropTypes = __webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js");
 const React = __webpack_require__(/*! react */ "react");
@@ -16631,6 +16637,49 @@ ReactDOM.render(React.createElement(Router.BrowserRouter, null,
 
 /***/ }),
 
+/***/ "./src/lib/post.request.ts":
+/*!*********************************!*\
+  !*** ./src/lib/post.request.ts ***!
+  \*********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const axios = __webpack_require__(/*! axios */ "axios");
+const config_1 = __webpack_require__(/*! ../../server/config */ "./server/config.ts");
+class PostAPIRequest {
+}
+PostAPIRequest.createPost = (title, content, boardTitle, fileIds) => {
+    return axios.default.post(config_1.config.url + "/api/v1/post/write", {
+        post_title: title,
+        post_content: content,
+        board_title: boardTitle,
+        files_attached: fileIds,
+    });
+};
+PostAPIRequest.retrievePostList = (page, year, boardTitle) => {
+    return axios.default.get(`${config_1.config.url}/api/v1/post/page/${page}?year=${year}&board_title=${boardTitle}`);
+};
+PostAPIRequest.retrievePostById = (postId) => {
+    return axios.default.get(`${config_1.config.url}/api/v1/post/${postId}`);
+};
+PostAPIRequest.updatePost = (post) => {
+    return axios.default.put(`${config_1.config.url}/api/v1/post/update/${post.getId()}`, {
+        post_title: post.getTitle(),
+        post_content: post.getContent(),
+        files_attached: post.getFilesAttached(),
+    });
+};
+PostAPIRequest.deletePost = (postId) => {
+    return axios.default.delete(`${config_1.config.url}/api/v1/post/delete/${postId}`);
+};
+exports.PostAPIRequest = PostAPIRequest;
+
+
+/***/ }),
+
 /***/ "./src/lib/user.request.ts":
 /*!*********************************!*\
   !*** ./src/lib/user.request.ts ***!
@@ -16641,6 +16690,12 @@ ReactDOM.render(React.createElement(Router.BrowserRouter, null,
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * User API requester
+ *
+ * author: Jinwoo Shin
+ * date: 2018-04-18
+ */
 const axios_1 = __webpack_require__(/*! axios */ "axios");
 const config_1 = __webpack_require__(/*! ../../server/config */ "./server/config.ts");
 class UserAPIRequest {
@@ -16688,6 +16743,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * /board page
+ *
+ * author: Jinwoo Shin
+ * date: 2018-04-16
+ */
 const PropTypes = __webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js");
 const query = __webpack_require__(/*! query-string */ "./node_modules/query-string/index.js");
 const React = __webpack_require__(/*! react */ "react");
@@ -16750,6 +16811,12 @@ exports.BoardPage = BoardPage;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * / page
+ *
+ * author: Jinwoo Shin
+ * date: 2018-04-20
+ */
 const React = __webpack_require__(/*! react */ "react");
 const login_form_component_1 = __webpack_require__(/*! ../components/login-form.component */ "./src/components/login-form.component.tsx");
 class HomePage extends React.Component {
@@ -16775,12 +16842,71 @@ exports.HomePage = HomePage;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const jquery = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
+const propTypes = __webpack_require__(/*! prop-types */ "./node_modules/prop-types/index.js");
 const React = __webpack_require__(/*! react */ "react");
+const ReactDOM = __webpack_require__(/*! react-dom */ "react-dom");
+const reqPost = __webpack_require__(/*! ../lib/post.request */ "./src/lib/post.request.ts");
+const reqUser = __webpack_require__(/*! ../lib/user.request */ "./src/lib/user.request.ts");
 class WritePostPage extends React.Component {
+    constructor() {
+        super(...arguments);
+        this.onWriteClicked = () => {
+            const title = jquery("#title").val();
+            const content = jquery("#content").val();
+            const boardTitle = "세미나";
+            const files = [];
+            reqPost.PostAPIRequest.createPost(title, content, boardTitle, files)
+                .then((res) => {
+                const body = res.data;
+                if (body["result"] === "ok") {
+                    alert("등록되었습니다.");
+                }
+                else {
+                    alert("등록에 실패하였습니다.");
+                }
+            });
+        };
+    }
+    componentDidMount() {
+        const titleLabel = ReactDOM.findDOMNode(this.refs["titleLabel"]);
+        const contentLabel = ReactDOM.findDOMNode(this.refs["contentLabel"]);
+        const contentForm = ReactDOM.findDOMNode(this.refs["contentForm"]);
+        if (titleLabel) {
+            jquery(titleLabel).attr("for", "title");
+        }
+        if (contentLabel) {
+            jquery(contentLabel).attr("for", "content");
+        }
+        if (contentForm) {
+            jquery(contentForm).attr("rows", "20");
+        }
+        reqUser.UserAPIRequest.checkSignedIn()
+            .then((res) => {
+            const body = res.data;
+            if (!body["state"]["signed"]) {
+                alert("로그인이 필요합니다.");
+                this.context["router"]["history"]["push"]("/");
+            }
+        });
+    }
     render() {
-        return (React.createElement("div", null, "Write some post"));
+        return (React.createElement("div", null,
+            "Write some post",
+            React.createElement("div", { className: "form-group" },
+                React.createElement("label", { ref: "titleLabel" }, "\uC81C\uBAA9"),
+                React.createElement("input", { type: "text", id: "title", className: "form-control", placeholder: "\uC81C\uBAA9\uC744 \uC785\uB825\uD558\uC138\uC694." })),
+            React.createElement("div", { className: "form-group" },
+                React.createElement("label", { ref: "contentLabel" }, "\uB0B4\uC6A9"),
+                React.createElement("textarea", { id: "content", className: "form-control", ref: "contentForm" })),
+            React.createElement("button", { className: "btn bg-primary text-white text-center float-right", onClick: this.onWriteClicked },
+                React.createElement("img", { src: "/img/ic_create_white_48px.svg", className: "icon" }),
+                "\uC644\uB8CC")));
     }
 }
+WritePostPage.contextType = {
+    router: propTypes.object.isRequired,
+};
 exports.WritePostPage = WritePostPage;
 
 
