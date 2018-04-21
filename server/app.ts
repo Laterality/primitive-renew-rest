@@ -1,7 +1,7 @@
 /**
  * Server App Entry
  * 
- * Author: Jin-woo Shin
+ * Author: Jinwoo Shin
  * Date: 2018-03-26
  */
 
@@ -46,11 +46,6 @@ app.use(session({
 		secure: false,
 	},
 }));
-
-app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-	console.log("session id: ", req.sessionID);
-	next();
-});
 app.use("/api", new APIRouter(db, eh).getRouter());
 app.use("/api", (req: express.Request, res: express.Response) => {
 	return resHandler.response(res,
