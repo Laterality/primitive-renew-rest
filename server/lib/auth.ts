@@ -1,7 +1,7 @@
 /**
  * Authentication helper
  * 
- * author: Jin-woo Shin
+ * author: Jinwoo Shin
  * date: 2018-03-26
  */
 import * as bcrypt from "bcrypt-nodejs";

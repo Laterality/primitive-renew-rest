@@ -1,3 +1,9 @@
+/**
+ * Simple in memory db implementation
+ * 
+ * author: Jinwoo Shin
+ * date: 2018-04-16
+ */
 import { IDatabase } from "./db-interface";
 
 import { BoardDBO } from "./board.dbo";

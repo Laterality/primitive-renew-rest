@@ -1,7 +1,7 @@
 /**
  * API version router
  * 
- * author: Jin-woo Shin
+ * author: Jinwoo Shin
  * date: 2018-03-26
  */
 import * as express from "express";

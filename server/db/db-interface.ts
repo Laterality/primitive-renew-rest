@@ -1,7 +1,7 @@
 /**
  * Database interface for database layer abstraction
  * 
- * author: Jin-woo Shin
+ * author: Jinwoo Shin
  * date: 2018-03-29
  */
 import { BoardDBO } from "./board.dbo";

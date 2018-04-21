@@ -1,7 +1,7 @@
 /**
  * Authentication API 
  * 
- * author: Jin-woo Shin
+ * author: Jinwoo Shin
  * date: 2018-04-16
  */
 import * as express from "express";

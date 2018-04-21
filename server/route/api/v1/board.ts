@@ -1,7 +1,7 @@
 /**
  * Board API V1
  * 
- * author: Jin-woo Shin
+ * author: Jinwoo Shin
  * date: 2018-03-29
  */
 import * as express from "express";

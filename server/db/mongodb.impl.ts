@@ -1,7 +1,7 @@
 /**
  * Implementation of DB interface for mongodb
  * 
- * author: Jin-woo Shin
+ * author: Jinwoo Shin
  * date: 2018-03-29
  */
 import * as mongoose from "mongoose";

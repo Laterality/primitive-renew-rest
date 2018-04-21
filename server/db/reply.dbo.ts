@@ -1,7 +1,7 @@
 /**
  * Reply object for database layer abstraction
  * 
- * author: Jin-woo Shin
+ * author: Jinwoo Shin
  * date: 2018-04-02
  */
 import { PostDBO } from "./post.dbo";
