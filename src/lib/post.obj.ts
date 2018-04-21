@@ -14,9 +14,9 @@ import { UserObject } from "./user.obj";
 		private title: string,
 		private content: string,
 		private board: string,
-		private author: UserObject,
-		private filesAttached: FileObject[],
-		private dateCreated: Date,
+		private filesAttached?: FileObject[],
+		private dateCreated?: Date,
+		private author?: UserObject,
 		private replies?: ReplyObject[],
 		private id?: string | number,
 	) {}
