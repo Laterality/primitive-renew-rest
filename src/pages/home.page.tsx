@@ -1,3 +1,9 @@
+/**
+ * / page
+ * 
+ * author: Jinwoo Shin
+ * date: 2018-04-20
+ */
 import * as React from "react";
 
 import { LoginForm } from "../components/login-form.component";

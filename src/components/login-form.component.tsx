@@ -1,3 +1,9 @@
+/**
+ * Login form component
+ * 
+ * author: Jinwoo Shin
+ * date: 2018-04-20
+ */
 import * as jquery from "jquery";
 import * as PropTypes from "prop-types";
 import * as React from "react";

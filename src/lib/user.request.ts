@@ -1,3 +1,9 @@
+/**
+ * User API requester
+ * 
+ * author: Jinwoo Shin
+ * date: 2018-04-18
+ */
 import { default as axios } from "axios";
 
 import { config } from "../../server/config";

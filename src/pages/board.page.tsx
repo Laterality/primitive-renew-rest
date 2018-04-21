@@ -1,3 +1,9 @@
+/**
+ * /board page
+ * 
+ * author: Jinwoo Shin
+ * date: 2018-04-16
+ */
 import * as PropTypes from "prop-types";
 import * as query from "query-string";
 import * as React from "react";

@@ -1,3 +1,9 @@
+/**
+ * /post page
+ * 
+ * author: Jinwoo Shin
+ * dat: 2018-04-18
+ */
 import * as React from "react";
 
 export class PostPage extends React.Component {
