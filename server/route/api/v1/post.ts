@@ -57,7 +57,19 @@ export class PostAPI {
 		const filesAttached = req.body["files_attached"];
 
 		try {
-			const boardFound = await this.db.findBoardByTitle(board);
+			let boardFound = null;
+			try {
+				boardFound = await this.db.findBoardByTitle(board);
+			}
+			catch (e) {
+				if (e["message"] === "not found") {
+					boardFound = null;
+				}
+				else {
+					throw e;
+				}
+			}
+
 			if (boardFound === null) {
 				// 존재하지 않는 게시판명인경우
 				return resHandler.response(res, 
