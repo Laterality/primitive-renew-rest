@@ -13,7 +13,7 @@ export class UserAPIRequest {
 
 	public static registerUser = (user: UserObject, pw: string) => {
 		return axios.post(
-			config.url + "/api/v1/user/register",
+			`${config.front.baseurl}/api/v1/user/register`,
 			{
 				name: user.getName(),
 				sid: user.getSid(),
@@ -24,7 +24,7 @@ export class UserAPIRequest {
 
 	public static loginUser = (id: string, pw: string) => {
 		return axios.post(
-			config.url + "/api/v1/auth/login",
+			`${config.front.baseurl}/api/v1/auth/login`,
 			{
 				id,
 				pw,
@@ -33,10 +33,10 @@ export class UserAPIRequest {
 	}
 
 	public static logoutUser = () => {
-		return axios.get(config.url + "/api/v1/auth/logout");
+		return axios.get(`${config.front.baseurl}/api/v1/auth/logou`);
 	}
 
 	public static checkSignedIn = () => {
-		return axios.get(config.url + "/api/v1/auth/check");
+		return axios.get(`${config.front.baseurl}/api/v1/auth/check`);
 	}
 }
