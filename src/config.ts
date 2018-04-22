@@ -13,8 +13,4 @@ export const config = {
 	test: {
 		baseurl: "http://trailblazer.latera.kr/yd/api/v1",
 	},
-	front: {
-		// the base url for API calls
-		baseurl: "http://localhost:3100",
-	},
 };
