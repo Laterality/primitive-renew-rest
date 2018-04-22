@@ -6,10 +6,10 @@ export const config = {
 		cert: "PATH_TO_PUBLIC_KEY",
 	},
 	db: {
-		uri: "MONGODB_URI",
-
+		dbms: "mongodb", // one of ["in-memory", "mongodb"]
+		uri: "mongodb://localhost:27017/primitive",
 	},
-	path_public: "/home/server/apps/public/primitive-web", // definite path
+	path_public: "/home/server/apps/public/primitive/uploads", // definite path
 	test: {
 		baseurl: "http://trailblazer.latera.kr/yd/api/v1",
 	},

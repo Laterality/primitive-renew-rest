@@ -538,7 +538,8 @@ export class MongoDBImpl implements IDatabase {
 			(doc as any)["name"],
 			(doc as any)["password"],
 			(doc as any)["salt"],
-			(this.roleDocToDBO((doc as any)["role"])) as RoleDBO);
+			(this.roleDocToDBO((doc as any)["role"])) as RoleDBO,
+			doc._id);
 	}
 
 	private usersDocToDBO(docs: mongoose.Document[]): UserDBO[] {

@@ -35,8 +35,7 @@ export class V1API {
 
 	private sessionCheck = (req: express.Request, res: express.Response, 
 	next: express.NextFunction) => {
-		if (!req.session) { throw new Error("session not exist"); }
-		if (!req.session["userId"]) {
+		if (!req.user) {
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_FORBIDDEN,
