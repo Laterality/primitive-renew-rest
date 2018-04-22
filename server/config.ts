@@ -1,6 +1,5 @@
 export const config = {
 	port: 3100,
-	url: "http://localhost:3100",
 	https: {
 		use: false,
 		key: "PATH_TO_PRIVATE_KEY",
@@ -13,5 +12,9 @@ export const config = {
 	path_public: "/home/server/apps/public/primitive-web", // definite path
 	test: {
 		baseurl: "http://trailblazer.latera.kr/yd/api/v1",
+	},
+	front: {
+		// the base url for API calls
+		baseurl: "http://localhost:3100",
 	},
 };
