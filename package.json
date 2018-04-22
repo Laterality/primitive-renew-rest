@@ -4,7 +4,7 @@
   "description": "Website for KNU Primitive",
   "main": "app.js",
   "scripts": {
-    "start": "node build/server/app.js",
+    "start": "node build/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
