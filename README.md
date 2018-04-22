@@ -1,29 +1,25 @@
 # primitive-web
 
-[![](https://data.jsdelivr.com/v1/package/npm/axios/badge)](https://www.jsdelivr.com/package/npm/axios)
-
-Website for KNU Primitive.
+REST API for KNU Primitive Website renewal project.
 
 Term project on semester 1, 2018.
 
-### build
+### install
 
-#### Backend
+```
+git clone https://github.com/Laterality/primitive-renew-rest
+cd prmitive-renew-rest
+npm install
+```
+
+### build
 
 ```
 gulp build-server
 ```
 
-#### Frontend
-
-```
-webpack
-```
-
 ### run
 
 ```
-npm run start-server
+npm start
 ```
-
-Then, open the `http://localhost:3100` with Your favorite browser.
