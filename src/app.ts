@@ -112,10 +112,10 @@ app.use(session({
 	cookie: {
 		secure: false,
 	},
-	// store: new redisStore({
-	// 	host: "127.0.0.1",
-	// 	port: 6379,
-	// }),
+	store: new redisStore({
+		host: "127.0.0.1",
+		port: 6379,
+	}),
 }));
 app.use(passport.initialize());
 app.use(passport.session());
