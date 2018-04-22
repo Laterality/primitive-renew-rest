@@ -19,6 +19,7 @@
   "homepage": "https://github.com/Laterality/primitive-web#readme",
   "dependencies": {
     "@types/bcrypt-nodejs": "0.0.30",
+    "@types/cors": "^2.8.3",
     "@types/express": "^4.11.1",
     "@types/express-session": "^1.15.8",
     "@types/gulp": "^4.0.5",
@@ -39,6 +40,7 @@
     "@types/request-promise-native": "^1.0.14",
     "@types/serve-favicon": "^2.2.30",
     "bcrypt-nodejs": "0.0.3",
+    "cors": "^2.8.4",
     "express": "^4.16.3",
     "express-session": "^1.15.6",
     "gulp": "^3.9.1",
