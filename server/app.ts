@@ -6,6 +6,7 @@
  */
 
 import * as bodyParser from "body-parser";
+import * as cors from "cors";
 import * as express from "express";
 import * as session from "express-session";
 import * as helmet from "helmet";
@@ -29,11 +30,12 @@ const db = MongoDBImpl.getInstance();
 const eh = new ConsoleErrorHandler();
 
 // 미들웨어 세팅
+app.use(morgan("dev"));
 app.use(helmet());
+app.use(cors());
+app.options("*", cors());
 app.use(favicon(path.join(__dirname, "./../../public", "favicon.ico")));
 app.use(express.static(path.join(__dirname, "./../../public")));
-app.use(express.static(config.path_public));
-app.use(morgan("dev"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 // TODO: production에서는 시크릿 값 수정해야 함
@@ -55,7 +57,9 @@ app.use("/api", (req: express.Request, res: express.Response) => {
 		));
 });
 
+app.use(express.static(config.path_public));
 app.get("/*", (req: express.Request, res: express.Response) => {
+	console.log("serve index.html");
 	res.sendFile(path.join(__dirname + "./../../public/index.html"));
 });
 
