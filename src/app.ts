@@ -68,6 +68,12 @@ passport.deserializeUser((id: any, done) => {
 		db.findUserById(id)
 		.then((user: UserDBO) => {
 			done(null, user);
+		})
+		.catch((err: Error) => {
+			eh.onError(err, {
+				id,
+			});
+			
 		});
 	}
 });
@@ -101,13 +107,6 @@ passport.use(new localStrategy.Strategy({
 app.use(morgan("dev"));
 app.use(helmet());
 // app.use(cors());
-app.use((req, res, next) => {
-	res.header("Access-Control-Allow-Origin", req.header("Origin"));
-	res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
-	res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
-	res.header("Access-Control-Allow-Credentials", "true");
-	next();
-});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 // TODO: production에서는 시크릿 값 수정해야 함
@@ -125,6 +124,14 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use((req, res, next) => {
+	res.header("Access-Control-Allow-Origin", req.header("Origin"));
+	res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept");
+	res.header("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS, DELETE");
+	res.header("Access-Control-Allow-Credentials", "true");
+	if (req.method === "OPTIONS") { res.end(); }
+	else { next(); }
+});
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
 	console.log("sid: ", req.sessionID);
 	next();
