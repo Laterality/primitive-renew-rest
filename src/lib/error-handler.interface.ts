@@ -5,5 +5,5 @@
  * date: 2018-04-18
  */
 export interface IErrorhandler {
-	onError(err: Error): void;
+	onError(err: Error, param?: any): void;
 }
