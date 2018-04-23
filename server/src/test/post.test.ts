@@ -113,7 +113,6 @@ describe("Test Post API", () => {
 		});
 	});
 
-
 	it("5. Delete post", (done: any) => {
 		postReq.deletePost(postsCreated[0]["id"])
 		.then((res1: any) => {

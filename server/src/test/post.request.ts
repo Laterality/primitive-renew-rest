@@ -1,58 +1,61 @@
-import * as request from "request-promise-native";
+/**
+ * Post API requester
+ * 
+ * author: Jinwoo Shin
+ * date: 2018-04-05
+ */
+import { default as axios } from "axios";
+import * as qs from "querystring";
 
 import { config } from "../config";
 import { FileDBO } from "../db/file.dbo";
 
-export async function createPost(title: string, content: string, boardTitle: string, files: string[]): Promise<any> {
-	return request({
-		uri: config.test.baseurl + "/post/write",
+export function createPost(title: string, content: string, boardTitle: string, files: string[]): Promise<any> {
+	return axios(config.test.baseurl + "/post/write", {
 		method: "POST",
-		body: {
+		data: {
 			post_title: title,
 			post_content: content,
 			board_title: boardTitle,
 			files_attached: files,
 		},
-		json: true,
-	}).promise();
+		withCredentials: true,
+	});
 }
 
-export async function retrievePostList(pageNum: number, boardTitle: string, year: number) {
-	return request({
-		uri: config.test.baseurl + "/post/page/" + pageNum,
-		qs: {
+export function retrievePostList(pageNum: number, boardTitle: string, year: number) {
+	return axios(config.test.baseurl + "/post/page/" + pageNum, {
+		method: "GET",
+		data: qs.stringify({
 			year,
 			board: boardTitle,
-		},
-		json: true,
-	}).promise();
+		}),
+		withCredentials: true,
+	});
 }
 
-export async function retrievePostById(id: string) {
-	return request({
-		uri: config.test.baseurl + "/post/" + id,
+export function retrievePostById(id: string) {
+	return axios(config.test.baseurl + "/post/" + id, {
 		method: "GET",
-		json: true,
-	}).promise();
+		withCredentials: true,
+	});
 }
 
-export async function updatePost(id: string, postTitle: string | null, postContent: string | null, filesAttached: any[] | null): Promise<any> {
-	return request({
-		uri: config.test.baseurl + "/post/update/" + id,
+export function updatePost(id: string, postTitle: string | null, postContent: string | null, filesAttached: any[] | null): Promise<any> {
+	return axios(config.test.baseurl + "/post/update/" + id, {
 		method: "PUT",
-		body: {
+		data: {
 			post_title: postTitle,
 			post_content: postContent,
 			files_attached: filesAttached,
 		},
-		json: true,
-	}).promise();
+		withCredentials: true,
+	});
 }
 
-export async function deletePost(id: string): Promise<any> {
-	return request({
-		uri: config.test.baseurl + "/post/delete/" + id,
+export function deletePost(id: string): Promise<any> {
+	return axios(config.test.baseurl + "/post/delete/" + id, {
 		method: "DELETE",
-		json: true,
-	}).promise();
+		withCredentials: true,
+	});
 }

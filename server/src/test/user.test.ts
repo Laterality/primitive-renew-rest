@@ -21,6 +21,11 @@ chai.use(chasAsPromised);
 describe("Test User API", () => {
 	let userCreatedA: any = {};
 
+	before((done) => {
+		userReq.loginUser("root", "root")
+		.then((res) => { done(); });
+	});
+
 	it("1. Register user", (done: any) => {
 		userReq.createUser(new UserDBO(
 			"201201234",
@@ -34,7 +39,10 @@ describe("Test User API", () => {
 			chai.expect(res1["result"]).to.equal("ok");
 			chai.expect(userCreatedA["id"]).to.exist("string");
 
-			done();
+			userReq.logoutUser()
+			.then(() => {
+				done();
+			});
 		});
 	});
 
