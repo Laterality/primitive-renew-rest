@@ -22,11 +22,11 @@ gulp.task("build-server", () => {
 });
 
 gulp.task("test", () => {
-	const arr = JSON.parse(fs.readFileSync("./server/test/tests.json", "utf-8"));
+	const arr = JSON.parse(fs.readFileSync("./src/test/tests.json", "utf-8"));
 	const tests = [];
 	for (const t in arr) {
 		if (arr[t]) {
-			tests.push(`./build/server/test/${t}.test.js`);
+			tests.push(`./build/test/${t}.test.js`);
 		}
 	}
 	// gulp.src("./out/test/*.test.js")
