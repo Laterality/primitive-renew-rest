@@ -11,6 +11,6 @@ export const config = {
 	},
 	path_public: "/home/server/apps/public/primitive/uploads", // definite path
 	test: {
-		baseurl: "http://trailblazer.latera.kr/yd/api/v1",
+		baseurl: "http://altair.latera.kr/pw/api/v1",
 	},
 };
