@@ -154,7 +154,7 @@ export class PostAPI {
 	private retrievePostList = async (req: express.Request, res: express.Response) => {
 		const pageNum		= req.params["pageNum"];
 		const year			= req.query["year"];
-		const boardTitle	= req.query["board"];
+		const boardTitle	= req.query["board_title"];
 
 		try {
 			// 권한 검사
