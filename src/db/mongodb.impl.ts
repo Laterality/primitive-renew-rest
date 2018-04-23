@@ -53,7 +53,9 @@ export class MongoDBImpl implements IDatabase {
 	 * id로 회원을 조회
 	 */
 	public async findUserById(id: string | number): Promise<UserDBO> {
-		const userFound = await model.UserModel.findById(id).exec();
+		const userFound = await model.UserModel.findById(id)
+		.populate("role")
+		.exec();
 		if (!userFound) { throw new Error("not found"); }
 		return this.userDocToDBO(userFound);
 	}
@@ -142,7 +144,8 @@ export class MongoDBImpl implements IDatabase {
 	 */
 	public async createRole(role: RoleDBO): Promise<RoleDBO> {
 		const newRole = new model.RoleModel({
-			role_title: role.getTitle()});
+			role_title: role.getTitle(),
+		});
 
 		const roleCreated = await newRole.save();
 
@@ -219,7 +222,10 @@ export class MongoDBImpl implements IDatabase {
 	 * @param title 조회할 게시판명
 	 */
 	public async findBoardByTitle(title: string): Promise<BoardDBO | null> {
-		const boardFound = await model.BoardModel.findOne({board_title: title}).exec();
+		const boardFound = await model.BoardModel.findOne({board_title: title})
+		.populate("roles_readable")
+		.populate("roles_writable")
+		.exec();
 		if (boardFound === null) { return null; }
 
 		return this.boardDocToDBO(boardFound);
@@ -289,14 +295,28 @@ export class MongoDBImpl implements IDatabase {
 		const newPost = new model.PostModel({
 			post_title: post.getTitle(),
 			post_content: post.getContent(),
-			boar: post.getBoard().getId(),
+			board: post.getBoard().getId(),
 			files_attached: fileIds,
 			author: post.getAuthor().getId(),
 			date_created: post.getDateCreated(),
 			replies: replIds,
 		});
 
-		const created = await newPost.populate("board").populate("author").populate("replies").save();
+		await newPost.save();
+
+		const created = await model.PostModel.findById(newPost._id)
+		.populate("board")
+		.populate({
+			path: "author",
+			populate: {
+				path: "role",
+			},
+		})
+		.populate("replies")
+		.populate("files_attached")
+		.exec();
+
+		if (!created) { throw new Error("can't find created post"); }
 
 		return this.postDocToDBO(created);
 	}
@@ -305,7 +325,7 @@ export class MongoDBImpl implements IDatabase {
 	 * 게시물 조회
 	 * @param id 게시물 id
 	 */
-	public async findPostById(id: string | number): Promise<PostDBO> {
+	public findPostById = async (id: string | number): Promise<PostDBO> => {
 		const postFound = await model.PostModel.findById(id)
 		.populate("board")
 		.populate("author")
@@ -519,9 +539,9 @@ export class MongoDBImpl implements IDatabase {
 
 	private rolesDocToDBO(docs: mongoose.Document[]): RoleDBO[] {
 		const roles = [];
-
+		console.log("role docs to dbo: ", docs);
 		for (const r of docs) {
-			roles.push(this.roleDocToDBO(r) as RoleDBO);
+			roles.push(this.roleDocToDBO(r));
 		}
 
 		return roles;
@@ -551,7 +571,7 @@ export class MongoDBImpl implements IDatabase {
 		return users;
 	}
 
-	private boardDocToDBO(doc: mongoose.Document): BoardDBO {
+	private boardDocToDBO = (doc: mongoose.Document): BoardDBO => {
 
 		return new BoardDBO(
 			(doc as any)["board_title"],
@@ -568,7 +588,7 @@ export class MongoDBImpl implements IDatabase {
 		return boards;
 	}
 
-	private postDocToDBO(doc: mongoose.Document): PostDBO{
+	private postDocToDBO = (doc: mongoose.Document): PostDBO => {
 		const da = doc as any;
 		return new PostDBO(
 			da["post_title"],
