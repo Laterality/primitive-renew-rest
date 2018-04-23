@@ -108,7 +108,7 @@ export class PostAPI {
 			
 			if (!req.user) { throw new Error("req.user is undefined"); }
 			const author = await this.db.findUserById(req.user["id"]);
-			console.log("create post: ", boardFound);
+			
 			const postCreated = await this.db.createPost(new PostDBO(
 				postTitle,
 				postContent,

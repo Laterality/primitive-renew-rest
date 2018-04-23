@@ -539,7 +539,7 @@ export class MongoDBImpl implements IDatabase {
 
 	private rolesDocToDBO(docs: mongoose.Document[]): RoleDBO[] {
 		const roles = [];
-		console.log("role docs to dbo: ", docs);
+		
 		for (const r of docs) {
 			roles.push(this.roleDocToDBO(r));
 		}
