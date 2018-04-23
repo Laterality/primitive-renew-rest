@@ -375,7 +375,7 @@ export class MongoDBImpl implements IDatabase {
 				},
 			],
 		});
-		console.log("postsFound: ", postsFound.docs);
+
 		return this.postsDocToDBO(postsFound.docs);
 	}
 	
