@@ -353,15 +353,29 @@ export class MongoDBImpl implements IDatabase {
 				$gte: dateFrom,
 				$lt: dateTo,
 			},
-		}, {
-			post_title: true,
-			post_content: true,
-			date_created: true,
-			author: true,
-		})
-		.populate("author");
-		const postsFound = await model.PostModel.paginate(query, {page, limit});
-
+		});
+		const postsFound = await model.PostModel.paginate(query, {
+			page, 
+			limit,
+			populate: [
+				{
+					path: "author",
+					populate: {
+						path: "role",
+					},
+				}, {
+				path: "board",
+				populate: {
+					path: "roles_readable roles_writable",
+					},
+				}, {
+					path: "files_attached",
+				}, {
+					path: "replies",
+				},
+			],
+		});
+		console.log("postsFound: ", postsFound.docs);
 		return this.postsDocToDBO(postsFound.docs);
 	}
 	
@@ -552,7 +566,6 @@ export class MongoDBImpl implements IDatabase {
 	 * @param doc DBO로 변환할 user document, 
 	 */
 	private userDocToDBO(doc: mongoose.Document): UserDBO {
-		doc.populate("role");
 		return new UserDBO(
 			(doc as any)["sid"],
 			(doc as any)["name"],
