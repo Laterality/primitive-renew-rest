@@ -93,7 +93,6 @@ export class AuthAPI {
 	 * @body state { any } 상태
 	 */
 	private isLoggedIn = (req: express.Request, res: express.Response) => {
-		if (!req.session) { throw new Error("session not exist"); }
 
 		if (req.user) {
 			return resHandler.response(res,

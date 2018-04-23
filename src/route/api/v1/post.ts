@@ -53,7 +53,7 @@ export class PostAPI {
 	private createPost = async (req: express.Request, res: express.Response) => {
 		const postTitle = req.body["post_title"];
 		const postContent = req.body["post_content"];
-		const board = req.body["board"];
+		const board = req.body["board_title"];
 		const filesAttached = req.body["files_attached"];
 
 		try {
@@ -105,10 +105,10 @@ export class PostAPI {
 							"not found(file)"));
 				}
 			}
-	
-			const author = await this.db.findUserById(
-				(req.session as Express.Session)["userId"]);
 			
+			if (!req.user) { throw new Error("req.user is undefined"); }
+			const author = await this.db.findUserById(req.user["id"]);
+			console.log("create post: ", boardFound);
 			const postCreated = await this.db.createPost(new PostDBO(
 				postTitle,
 				postContent,
@@ -261,8 +261,9 @@ export class PostAPI {
 
 		try {
 			const postFound = await this.db.findPostById(postId);
+			if (!req.user) { throw new Error("req.user is undefined"); }
 
-			if ((req.session as Express.Session)["userId"] !== postFound.getAuthor().getId() &&
+			if (req.user["id"] !== postFound.getAuthor().getId() &&
 				!checkRole(this.db, req, "관리자")) {
 					return resHandler.response(res, 
 						new resHandler.ApiResponse(
@@ -325,8 +326,9 @@ export class PostAPI {
 		try {
 			const postFound = await this.db.findPostById(postId);
 
+			if (!req.user) { throw new Error("req.user is undefined"); }
 			// 권한 검사
-			if ((req.session as Express.Session)["userId"] !== postFound.getAuthor().getId() &&
+			if (req.user["id"] !== postFound.getAuthor().getId() &&
 				!checkRole(this.db, req, "관리자")) {
 					return resHandler.response(res, 
 						new resHandler.ApiResponse(

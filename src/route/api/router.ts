@@ -51,10 +51,10 @@ export class APIRouter {
 				
 							// 게시판 생성
 							const seminarPermitted: RoleDBO[] = [];
-							seminarPermitted.push(await this.db.findRoleByTitle("신입생") as RoleDBO);
-							seminarPermitted.push(await this.db.findRoleByTitle("재학생") as RoleDBO);
-							seminarPermitted.push(await this.db.findRoleByTitle("졸업생") as RoleDBO);
-							seminarPermitted.push(await this.db.findRoleByTitle("관리자") as RoleDBO);
+							seminarPermitted.push(await this.db.findRoleByTitle("신입생"));
+							seminarPermitted.push(await this.db.findRoleByTitle("재학생"));
+							seminarPermitted.push(await this.db.findRoleByTitle("졸업생"));
+							seminarPermitted.push(await this.db.findRoleByTitle("관리자"));
 				
 							await this.db.createBoard(new BoardDBO("세미나", seminarPermitted, seminarPermitted));
 							await this.db.createBoard(new BoardDBO("과제", seminarPermitted, seminarPermitted));
