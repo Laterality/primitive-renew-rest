@@ -353,7 +353,7 @@ export class MongoDBImpl implements IDatabase {
 				$gte: dateFrom,
 				$lt: dateTo,
 			},
-		});
+		}).sort({date_created: -1});
 		const postsFound = await model.PostModel.paginate(query, {
 			page, 
 			limit,
