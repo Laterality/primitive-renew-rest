@@ -116,7 +116,7 @@ export class AuthAPI {
 						name: "state",
 						obj: {
 							signed: true,
-							id: req.user["id"],
+							id: serialize(req.user),
 						},
 					},
 				));
