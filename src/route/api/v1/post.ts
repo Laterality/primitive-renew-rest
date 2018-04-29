@@ -149,7 +149,8 @@ export class PostAPI {
 	 * Response
 	 * @body result { string } 결과
 	 * @body message { string } 결과 메시지
-	 * @body posts { PostModel[] } 조회된 게시물 목록
+	 * @body posts.posts { PostModel[] } 조회된 게시물 목록
+	 * @body posts.total { int } 해당 조건의 총 게시물 수
 	 */
 	private retrievePostList = async (req: express.Request, res: express.Response) => {
 		const pageNum		= req.params["pageNum"];
@@ -169,7 +170,7 @@ export class PostAPI {
 			}
 			const postsFound = await this.db.findPostsByBoard(board.getId() as string, year, pageNum, 5);
 
-			for (const post of postsFound) {
+			for (const post of postsFound[0]) {
 				post.setExcerpt(100);
 			}
 
@@ -180,7 +181,10 @@ export class PostAPI {
 					"",
 					{
 						name: "posts",
-						obj: serialize<PostDBO[]>(postsFound),
+						obj: {
+							total: postsFound[1],
+							posts: serialize<PostDBO[]>(postsFound[0]),
+						},
 					},
 				));
 		}

@@ -344,7 +344,7 @@ export class MongoDBImpl implements IDatabase {
 	 * @param year 작성 연도
 	 * @param page 조회할 페이지 번호
 	 */
-	public async findPostsByBoard(boardId: string | number, year: number, page: number, limit: number): Promise<PostDBO[]> {
+	public async findPostsByBoard(boardId: string | number, year: number, page: number, limit: number): Promise<[PostDBO[], number]> {
 		const dateFrom = new Date(year, 1, 1);
 		const dateTo = new Date(year + 1, 1, 1);
 		const query = model.PostModel.find({
@@ -376,7 +376,7 @@ export class MongoDBImpl implements IDatabase {
 			],
 		});
 
-		return this.postsDocToDBO(postsFound.docs);
+		return [this.postsDocToDBO(postsFound.docs), postsFound.total];
 	}
 	
 	/**

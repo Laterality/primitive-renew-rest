@@ -131,7 +131,7 @@ export interface IDatabase {
 	 * @param page 조회할 페이지 번호
 	 * @param limit 페이지 당 게시물 수
 	 */
-	findPostsByBoard(boardId: string | number, year: number, page: number, limit: number): Promise<PostDBO[]>;
+	findPostsByBoard(boardId: string | number, year: number, page: number, limit: number): Promise<[PostDBO[], number]>;
 	
 	/**
 	 * 게시물 갱신

@@ -309,7 +309,7 @@ export class InMemoryDB implements IDatabase {
 	 * @param page 조회할 페이지 번호
 	 * @param limit 페이지 당 게시물 수
 	 */
-	public async findPostsByBoard(boardId: string | number, year: number, page: number, limit: number): Promise<PostDBO[]> {
+	public async findPostsByBoard(boardId: string | number, year: number, page: number, limit: number): Promise<[PostDBO[], number]> {
 		// limit와 boardId 조건만 적용
 		const postsOnBoard = [];
 		for (const p of this.posts) {
@@ -317,8 +317,9 @@ export class InMemoryDB implements IDatabase {
 				postsOnBoard.push(p);
 			}
 		}
-
-		return Promise.resolve(postsOnBoard.slice(0, limit - 1));
+		// TODO: this function always returns 0 as total posts
+		
+		return [postsOnBoard.slice(0, limit - 1), 1];
 	}
 	
 	/**
