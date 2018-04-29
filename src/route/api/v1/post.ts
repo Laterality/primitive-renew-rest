@@ -25,9 +25,9 @@ export class PostAPI {
 		this.router = express.Router();
 		this.router.post("/write", this.createPost);
 		this.router.get("/page/:pageNum", this.retrievePostList);
-		this.router.get("/:postId", this.retrievePostById);
 		this.router.put("/update/:postId", this.updatePost);
 		this.router.delete("/delete/:postId", this.deletePost);
+		this.router.get("/:postId", this.retrievePostById);
 
 	}
 
