@@ -72,7 +72,7 @@ export function serialize<T>(dbo: T): any {
 			post_content: dbo.getContent(),
 			board: dbo.getBoard().getTitle(),
 			files_attached: filesSerialized,
-			author: dbo.getAuthor(),
+			author: serialize(dbo.getAuthor()),
 			date_created: dbo.getDateCreated(),
 			replies: repliesSerialized};
 	}
