@@ -12,6 +12,7 @@ import { IDatabase } from "../../../db/db-interface";
 import * as auth from "../../../lib/auth";
 import { IErrorhandler } from "../../../lib/error-handler.interface";
 import * as resHandler from "../../../lib/response-handler";
+import { serialize } from "../../../lib/serializer";
 
 export class AuthAPI {
 
@@ -40,11 +41,22 @@ export class AuthAPI {
 	 * @body pw { string } 사용자 비밀번호 raw text
 	 * 
 	 * Response
-	 * @body result { string } 사용자 
+	 * @body result { string } 로그인 결과
+	 * @body message { string } 결과 메시지
+	 * @body user { UserModel } 로그인된 사용자 정보
 	 */
 	private onLoginSucceed = (req: express.Request, res: express.Response) => {
 		return resHandler.response(res,
-			resHandler.createOKResponse());
+			new resHandler.ApiResponse(
+				resHandler.ApiResponse.CODE_OK,
+				resHandler.ApiResponse.RESULT_OK,
+				"",
+				{
+					name: "user",
+					obj: serialize(req.user),
+				},
+			),
+		);
 	}
 
 	/**
