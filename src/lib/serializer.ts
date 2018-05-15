@@ -80,7 +80,7 @@ export function serialize<T>(dbo: T): any {
 		return {
 			id: dbo.getId(),
 			reply_content: dbo.getContent(),
-			post_id: dbo.getPost(),
+			post_id: dbo.getPostId(),
 			author: serialize(dbo.getAuthor()),
 			dateCreated: dbo.getDateCreated()};
 	}
