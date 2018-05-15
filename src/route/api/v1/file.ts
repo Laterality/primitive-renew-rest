@@ -55,10 +55,10 @@ export class FileAPI {
 	 */
 	private uploadFile = async (req: express.Request, res: express.Response) => {
 		try {
-			const fileCreated = await this.db.createFile(new FileDBO(
+			const fileCreated = await this.db.createFile(
 				req.file.filename,
 				req.file.path,
-			));
+			);
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_OK,

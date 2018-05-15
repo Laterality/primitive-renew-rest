@@ -89,12 +89,11 @@ export class BoardAPI {
 			}
 
 			// 새 게시판 생성
-			const newBoard = new BoardDBO(
+			const boardCreated = await this.db.createBoard(
 				boardTitle,
-				roleIdsReadable,
-				roleIdsWritable);
-
-			const boardCreated = await this.db.createBoard(newBoard);
+				rolesReadable,
+				rolesWritable,
+			);
 
 			return resHandler.response(res, 
 				new resHandler.ApiResponse(

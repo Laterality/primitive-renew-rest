@@ -27,7 +27,8 @@ describe("Test User API", () => {
 			"John Smith",
 			"p@ssW0rd",
 			"",
-			new RoleDBO("신입생"),
+			new RoleDBO("신입생", ""),
+			"",
 		))
 		.then((res1: any) => {
 			userCreatedA = res1["user"];

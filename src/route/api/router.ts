@@ -44,25 +44,25 @@ export class APIRouter {
 						if (e["message"] === "not found") {
 	
 							// 역할 생성
-							await this.db.createRole(new RoleDBO("신입생"));
-							await this.db.createRole(new RoleDBO("재학생"));
-							await this.db.createRole(new RoleDBO("졸업생"));
-							const roleAdmin = await this.db.createRole(new RoleDBO("관리자"));
+							await this.db.createRole("신입생");
+							await this.db.createRole("재학생");
+							await this.db.createRole("졸업생");
+							const roleAdmin = await this.db.createRole("관리자");
 				
 							// 게시판 생성
-							const seminarPermitted: RoleDBO[] = [];
-							seminarPermitted.push(await this.db.findRoleByTitle("신입생"));
-							seminarPermitted.push(await this.db.findRoleByTitle("재학생"));
-							seminarPermitted.push(await this.db.findRoleByTitle("졸업생"));
-							seminarPermitted.push(await this.db.findRoleByTitle("관리자"));
+							const seminarPermitted: string[] = [];
+							seminarPermitted.push((await this.db.findRoleByTitle("신입생")).getTitle());
+							seminarPermitted.push((await this.db.findRoleByTitle("재학생")).getTitle());
+							seminarPermitted.push((await this.db.findRoleByTitle("졸업생")).getTitle());
+							seminarPermitted.push((await this.db.findRoleByTitle("관리자")).getTitle());
 				
-							await this.db.createBoard(new BoardDBO("세미나", seminarPermitted, seminarPermitted));
-							await this.db.createBoard(new BoardDBO("과제", seminarPermitted, seminarPermitted));
-							await this.db.createBoard(new BoardDBO("신입생 자료실", seminarPermitted, seminarPermitted));
+							await this.db.createBoard("세미나", seminarPermitted, seminarPermitted);
+							await this.db.createBoard("과제", seminarPermitted, seminarPermitted);
+							await this.db.createBoard("신입생 자료실", seminarPermitted, seminarPermitted);
 				
 							// 관리자 계정 생성
 							const authInfo = await encryption("root");
-							this.db.createUser(new UserDBO("root", "관리자", authInfo[0], authInfo[1], roleAdmin as RoleDBO));
+							this.db.createUser("root", "관리자", authInfo[0], authInfo[1], roleAdmin.getTitle());
 				
 							return resHandler.response(res, resHandler.createOKResponse());
 						}

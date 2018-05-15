@@ -82,12 +82,7 @@ export class UserAPI {
 				}
 
 				// 사용자 모델 객체 생성
-				const newUser = new UserDBO(
-					sid,
-					name,
-					authInfo[0],
-					authInfo[1],
-					roleFound);
+				const userCreated = this.db.createUser(name, sid, authInfo[0], authInfo[1], roleFound.getTitle());
 
 				return resHandler.response(res, new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_OK,
@@ -95,7 +90,7 @@ export class UserAPI {
 					"",
 					{
 						name: "newUser",
-						obj: serializer.serialize(newUser)}));
+						obj: serializer.serialize(userCreated)}));
 			}
 			else {
 				return resHandler.response(res, new resHandler.ApiResponse(

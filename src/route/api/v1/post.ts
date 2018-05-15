@@ -92,7 +92,7 @@ export class PostAPI {
 						resHandler.ApiResponse.RESULT_FAIL));
 			}
 	
-			const files: FileDBO[] = [];
+			const fileIds: string[] | number[] = [];
 			try {
 				this.db.findFilesById(filesAttached);
 			}
@@ -109,14 +109,7 @@ export class PostAPI {
 			if (!req.user) { throw new Error("req.user is undefined"); }
 			const author = await this.db.findUserById(req.user["id"]);
 			
-			const postCreated = await this.db.createPost(new PostDBO(
-				postTitle,
-				postContent,
-				boardFound,
-				files,
-				author,
-				new Date(),
-				[]));
+			const postCreated = await this.db.createPost(postTitle, postContent, boardFound.getId(), filesAttached, author.getId() );
 			
 			return resHandler.response(res, 
 				new resHandler.ApiResponse(
@@ -348,7 +341,7 @@ export class PostAPI {
 				fs.unlinkSync(f.getPath + "/" + f.getFilename());
 			}
 
-			await this.db.removePost(postFound);
+			await this.db.removePost(postFound.getId());
 
 			return resHandler.response(res,
 				new resHandler.ApiResponse(

@@ -11,6 +11,7 @@ import { ReplyDBO } from "../../../db/reply.dbo";
 
 import { IErrorhandler } from "../../../lib/error-handler.interface";
 import * as resHandler from "../../../lib/response-handler";
+import { serialize } from "../../../lib/serializer";
 import { checkRole } from "../../../lib/session-handler";
 
 export class ReplyAPI {
@@ -34,46 +35,56 @@ export class ReplyAPI {
 	 * method: POST
 	 * 
 	 * Request
-	 * @body postId { string } 댓글을 작성할 게시물 id
+	 * @body post_id { string } 댓글을 작성할 게시물 id
 	 * @body reply_content { string } 댓글 내용
 	 */
 	private createReply = async (req: express.Request, res: express.Response) => {
-		const postId = req.params["postId"];
+		const postId = req.body["post_id"];
 		const replyContent = req.body["reply_content"];
 
 		try {
 			const postFound = await this.db.findPostById(postId);
 			const board = postFound.getBoard();
-			const userFound = await this.db.findUserById((req.session as Express.Session)["userId"]);
 
-			const writableRoleTitles: string[] = [];
+			try {
+				const writableRoleTitles: string[] = [];
 
-			for (const r of board.getRolesWritable()) {
-				writableRoleTitles.push(r.getTitle());
-			}
+				for (const r of board.getRolesWritable()) {
+					writableRoleTitles.push(r.getTitle());
+				}
 
-			if (!checkRole(this.db, req, writableRoleTitles)) {
+				if (!checkRole(this.db, req, writableRoleTitles)) {
+					return resHandler.response(res,
+						new resHandler.ApiResponse(
+							resHandler.ApiResponse.CODE_FORBIDDEN,
+							resHandler.ApiResponse.RESULT_FAIL,
+							"not permitted",
+						));
+				}
+
+				const replyCreated = await this.db.createReply(
+					replyContent,
+					postId,
+					(req.user as Express.User)["id"],
+				);
+
 				return resHandler.response(res,
 					new resHandler.ApiResponse(
-						resHandler.ApiResponse.CODE_FORBIDDEN,
-						resHandler.ApiResponse.RESULT_FAIL,
-						"not permitted",
+						resHandler.ApiResponse.CODE_OK,
+						resHandler.ApiResponse.RESULT_OK,
 					));
 			}
-
-			const replyCreated = await this.db.createReply(
-				new ReplyDBO(
-					replyContent, 
-					postId, 
-					userFound, 
-					new Date(),
-				));
-
-			return resHandler.response(res,
-				new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_OK,
-					resHandler.ApiResponse.RESULT_OK,
-				));
+			catch (e) {
+				if (e["message"] === "not found") {
+					return resHandler.response(res,
+						new resHandler.ApiResponse(
+							resHandler.ApiResponse.CODE_NOT_FOUND,
+							resHandler.ApiResponse.RESULT_FAIL,
+							"not found(user)",
+						));
+				}
+				throw e;
+			}
 		}
 		catch (e) {
 			if (e["message"] === "not found") {
@@ -165,7 +176,7 @@ export class ReplyAPI {
 			}
 
 			// 댓글 삭제
-			await this.db.removeReply(replyFound);
+			await this.db.removeReply(replyFound.getId());
 
 			return resHandler.response(res,
 				new resHandler.ApiResponse(
