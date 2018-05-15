@@ -9,7 +9,7 @@ export class FileDBO {
 	public constructor(
 		private filename: string,
 		private path: string,
-		private id?: string | number,
+		private id: string | number,
 	) {}
 
 	public getId() { return this.id; }

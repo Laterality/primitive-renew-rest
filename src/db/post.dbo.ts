@@ -19,7 +19,7 @@ export class PostDBO {
 		private author: UserDBO,
 		private dateCreated: Date,
 		private replies: ReplyDBO[],
-		private id?: string | number,
+		private id: string | number,
 	) { }
 
 	public getTitle() { return this.postTitle; }
@@ -38,5 +38,6 @@ export class PostDBO {
 			this.postContent = this.postContent.substring(0, limit) + "...";
 		}
 	}
+	public setReplies(replies: ReplyDBO[]) { this.replies = replies; }
 	public setFiles(files: FileDBO[]) { this.filesAttached = files; }
 }

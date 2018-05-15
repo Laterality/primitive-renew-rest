@@ -14,7 +14,7 @@ export class UserDBO {
 		private password: string, 
 		private salt: string, 
 		private role: RoleDBO,
-		private id?: string | number) {}
+		private id: string | number) {}
 
 	public getId() {
 		return this.id;

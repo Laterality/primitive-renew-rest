@@ -13,7 +13,7 @@ export class BoardDBO {
 		private boardTitle: string,
 		private rolesReadable: RoleDBO[],
 		private rolesWritable: RoleDBO[],
-		private id?: string | number,
+		private id: string | number,
 		private posts: PostDBO[] = []) {
 
 	}
