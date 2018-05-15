@@ -34,17 +34,31 @@ export class MongoDBImpl implements IDatabase {
 
 	/**
 	 * 회원 생성
-	 * @param newUser 생성할 회원
+	 * @param name { string } 사용자 이름
+	 * @param sid { string } 사용자 아이디
+	 * @param password { string } 암호화된 비밀번호
+	 * @param salt { string } 솔트값
+	 * @param roleTitle { string } 사용자 등급명
 	 */
-	public async createUser(newUser: UserDBO): Promise<UserDBO> {
+	public async createUser(name: string, sid: string, password: string, salt: string, roleTitle: string): Promise<UserDBO> {
+		const roleFound = await model.RoleModel.findOne({role_title: roleTitle}).exec();
+		if (!roleFound) {
+			throw new Error("not found(role)");
+		}
 		const user = new model.UserModel({
-			name: newUser.getName(),
-			sid: newUser.getSID(),
-			password: newUser.getPassword(),
-			salt: newUser.getSalt(),
-			role: newUser.getRole().getId()}).populate("role");
+			name,
+			sid,
+			password,
+			salt,
+			role: roleFound._id});
 
-		const userCreated = await user.save();
+		await user.save();
+
+		const userCreated = await model.UserModel.findById(user._id)
+		.populate("role")
+		.exec();
+
+		if (!userCreated) { throw new Error("user not created"); }
 
 		return this.userDocToDBO(userCreated);
 	}
@@ -125,10 +139,10 @@ export class MongoDBImpl implements IDatabase {
 
 	/**
 	 * 회원 정보를 삭제
-	 * @param user 삭제할 회원
+	 * @param userId 삭제할 회원 id(not sid)
 	 */
-	public async removeUser(user: UserDBO): Promise<void> {
-		const userFound = await model.UserModel.findById(user).exec();
+	public async removeUser(userId: string | number): Promise<void> {
+		const userFound = await model.UserModel.findById(userId).exec();
 
 		if (!userFound) {
 			throw new Error("not found");
@@ -140,14 +154,18 @@ export class MongoDBImpl implements IDatabase {
 
 	/**
 	 * 역할 생성
-	 * @param role 생성할 역할
+	 * @param roleTitle 생성할 역할명
 	 */
-	public async createRole(role: RoleDBO): Promise<RoleDBO> {
+	public async createRole(roleTitle: string): Promise<RoleDBO> {
 		const newRole = new model.RoleModel({
-			role_title: role.getTitle(),
+			role_title: roleTitle,
 		});
 
-		const roleCreated = await newRole.save();
+		await newRole.save();
+
+		const roleCreated = await model.RoleModel.findById(newRole._id).exec();
+
+		if (!roleCreated) { throw new Error("role not created"); }
 
 		return this.roleDocToDBO(roleCreated);
 	}
@@ -183,26 +201,44 @@ export class MongoDBImpl implements IDatabase {
 	
 	/**
 	 * 게시판 생성
-	 * @param newBoard 생성할 게시판
+	 * @param boardTitle { string }생성할 게시판명
+	 * @param roleTitlesReadable { string[] } 읽기 가능한 역할명 배열
+	 * @param roleTitlesWritable { string[] } 쓰기 가능한 역할명 배열
 	 */
-	public async createBoard(newBoard: BoardDBO): Promise<BoardDBO> {
+	public async createBoard(boardTitle: string, roleTitlesReadable: string[], roleTitlesWritable: string[]): Promise<BoardDBO> {
 
-		const readableRoleIds: string[] = [];
-		const writableRoleIds: string[] = [];
-		for (const role of newBoard.getRolesReadable()) {
-			readableRoleIds.push(role.getId() as string);
-		}
-		for (const role of newBoard.getRolesWritable()) {
-			writableRoleIds.push(role.getId() as string);
-		}
-
-		const board = new model.BoardModel({
-			board_title: newBoard.getTitle(),
-			roles_readable: readableRoleIds,
-			roles_writable: writableRoleIds,
+		const rolesReadable = await model.RoleModel.find({
+			role_title: {
+				$in: roleTitlesReadable,
+			},
+		});
+		const rolesWritable = await model.RoleModel.find({
+			role_title: {
+				$in: roleTitlesWritable,
+			},
 		});
 
-		const boardCreated = await board.save();
+		const roleIdsReadable: string[] = rolesReadable.map((r: mongoose.Document) => {
+			return r._id;
+		});
+		const roleIdsWritable: string[] = rolesWritable.map((r: mongoose.Document) => {
+			return r._id;
+		});
+
+		const board = new model.BoardModel({
+			board_title: boardTitle,
+			roles_readable: roleIdsReadable,
+			roles_writable: roleIdsWritable,
+		});
+
+		await board.save();
+
+		const boardCreated = await model.BoardModel.findById(board._id)
+		.populate("roles_readable")
+		.populate("roles_writable")
+		.exec();
+
+		if (!boardCreated) { throw new Error("board not created"); }
 
 		return this.boardDocToDBO(boardCreated);
 	}
@@ -267,10 +303,10 @@ export class MongoDBImpl implements IDatabase {
 
 	/**
 	 * 게시판 삭제
-	 * @param board 삭제할 게시판
+	 * @param boardId { string | number } 삭제할 게시판 id
 	 */
-	public async removeBoard(board: BoardDBO): Promise<void> {
-		const boardFound = await model.BoardModel.findById(board.getId()).exec();
+	public async removeBoard(boardId: string | number): Promise<void> {
+		const boardFound = await model.BoardModel.findById(boardId).exec();
 
 		if (!boardFound) {
 			throw new Error("board not exist");
@@ -281,25 +317,21 @@ export class MongoDBImpl implements IDatabase {
 
 	/**
 	 * 게시물 생성
-	 * @param post 생성할 게시물
+	 * @param title { string } 게시물 제목
+	 * @param content { string } 게시물 내용
+	 * @param boardId { string | number } 게시판 id
+	 * @param fileIdsAttached { string[] | number[] } 첨부파일 id 배열
+	 * @param authorId { string | number } 작성자 id
 	 */
-	public async createPost(post: PostDBO): Promise<PostDBO> {
-		const fileIds: string[] = [];
-		const replIds: string[] = [];
-		for (const f of post.getFiles()) {
-			fileIds.push(f.getId() as string);
-		}
-		for (const r of post.getReplies()) {
-			replIds.push(r.getId() as string);
-		}
+	public async createPost(title: string, content: string, boardId: string | number, fileIdsAttached: string[] | number[], authorId: string | number): Promise<PostDBO> {
 		const newPost = new model.PostModel({
-			post_title: post.getTitle(),
-			post_content: post.getContent(),
-			board: post.getBoard().getId(),
-			files_attached: fileIds,
-			author: post.getAuthor().getId(),
-			date_created: post.getDateCreated(),
-			replies: replIds,
+			post_title: title,
+			post_content: content,
+			board: boardId,
+			files_attached: fileIdsAttached,
+			author: authorId,
+			date_created: Date.now(),
+			replies: [],
 		});
 
 		await newPost.save();
@@ -316,9 +348,9 @@ export class MongoDBImpl implements IDatabase {
 		.populate("files_attached")
 		.exec();
 
-		if (!created) { throw new Error("can't find created post"); }
+		if (!created) { throw new Error("post not created"); }
 
-		return this.postDocToDBO(created);
+		return this.postDocToDBO(created, true);
 	}
 
 	/**
@@ -329,13 +361,19 @@ export class MongoDBImpl implements IDatabase {
 		const postFound = await model.PostModel.findById(id)
 		.populate("board")
 		.populate("author")
-		.populate("replies")
-		.populate("replies.author")
+		.populate({
+			path: "replies",
+			populate: {
+				path: "author",
+				populate: {
+					path: "role",
+				},
+			},
+		})
 		.populate("files_attached")
 		.exec();
-
 		if (!postFound) { throw new Error("not found"); }
-		return this.postDocToDBO(postFound);
+		return this.postDocToDBO(postFound, true);
 	}
 
 	/**
@@ -370,13 +408,11 @@ export class MongoDBImpl implements IDatabase {
 					},
 				}, {
 					path: "files_attached",
-				}, {
-					path: "replies",
 				},
 			],
 		});
 
-		return [this.postsDocToDBO(postsFound.docs), postsFound.total];
+		return [this.postsDocToDBO(postsFound.docs, false), postsFound.total];
 	}
 	
 	/**
@@ -401,10 +437,10 @@ export class MongoDBImpl implements IDatabase {
 
 	/**
 	 * 게시물 삭제
-	 * @param post 삭제할 게시물
+	 * @param postId { string | number} 삭제할 게시물 id
 	 */
-	public async removePost(post: PostDBO): Promise<void> {
-		const postFound = await model.PostModel.findById(post.getId()).exec();
+	public async removePost(postId: string | number): Promise<void> {
+		const postFound = await model.PostModel.findById(postId).exec();
 		
 		if (!postFound) { throw new Error("not found"); }
 
@@ -415,18 +451,18 @@ export class MongoDBImpl implements IDatabase {
 	 * 댓글 생성
 	 * @param reply 생성할 댓글
 	 */
-	public async createReply(reply: ReplyDBO): Promise<ReplyDBO> {
+	public async createReply(content: string, postId: string | number, authorId: string | number): Promise<ReplyDBO> {
 		
 		const replyNew = new model.ReplyModel({
-			reply_content: reply.getContent(),
-			post: reply.getPost().getId(),
-			author: reply.getAuthor().getId(),
-			date_created: reply.getDateCreated(),
+			reply_content: content,
+			post: postId,
+			author: authorId,
+			date_created: Date.now(),
 		});
 
-		const postFound = await model.PostModel.findById(reply.getPost().getId()).exec();
+		const postFound = await model.PostModel.findById(postId).exec();
 
-		if (!postFound) { throw new Error("not found"); }
+		if (!postFound) { throw new Error("not found(post)"); }
 
 		const replyCreated = await replyNew.populate("post").populate("author").save();
 
@@ -434,7 +470,13 @@ export class MongoDBImpl implements IDatabase {
 
 		await postFound.save();
 
-		return this.replyDocToDBO(replyCreated);
+		const created = await model.ReplyModel.findById(replyCreated._id)
+		.populate("author")
+		.exec();
+
+		if (!created) { throw new Error("reply not created"); }
+
+		return this.replyDocToDBO(created, (created as any)["post"]);
 	}
 
 	/**
@@ -443,13 +485,12 @@ export class MongoDBImpl implements IDatabase {
 	 */
 	public async findReplyById(id: string | number): Promise<ReplyDBO> {
 		const replyFound = await model.ReplyModel.findById(id)
-		.populate("post")
 		.populate("author")
 		.exec();
 
 		if (!replyFound) { throw new Error("not found"); }
 
-		return this.replyDocToDBO(replyFound);
+		return this.replyDocToDBO(replyFound, (replyFound as any)["post"]);
 	}
 
 	/**
@@ -463,39 +504,42 @@ export class MongoDBImpl implements IDatabase {
 
 		(replyFound as any)["reply_content"] = reply.getContent();
 
-		const postFound = model.PostModel.findById(reply.getPost().getId());
+		const postFound = model.PostModel.findById(reply.getPostId());
 
 		await replyFound.save();
 	}
 
 	/**
 	 * 댓글 삭제
-	 * @param reply 삭제할 댓글
+	 * @param reply 삭제할 댓글 id
 	 */
-	public async removeReply(reply: ReplyDBO): Promise<void> {
-		const replyFound = await model.ReplyModel.findById(reply.getId()).exec();
+	public async removeReply(replyId: string | number): Promise<void> {
+		const replyFound = await model.ReplyModel.findById(replyId)
+		.populate("post")
+		.exec();
 		
 		if (!replyFound) { throw new Error("not found"); }
 
-		const postFound = await model.PostModel.findById(reply.getPost().getId());
+		const postFound = await model.PostModel.findById((replyFound as any)["post"]["_id"]);
 
 		if (!postFound) {
 			throw new Error("not found");
 		}
 
-		(postFound as any)["replies"].pull({_id: reply.getId()});
+		(postFound as any)["replies"].pull({_id: replyId});
 
 		await replyFound.remove();
 	}
 
 	/**
 	 * 파일 생성
-	 * @param file 생성할 파일
+	 * @param fileName { string } 파일명
+	 * @param filePaht { string } 파일 경로
 	 */
-	public async createFile(file: FileDBO): Promise<FileDBO> {
+	public async createFile(fileName: string, filePath: string): Promise<FileDBO> {
 		const newFile = new model.FileModel({
-			filename: file.getFilename(),
-			path: file.getPath(),
+			filename: fileName,
+			path: filePath,
 		});
 
 		const fileCreated = await newFile.save();
@@ -601,24 +645,26 @@ export class MongoDBImpl implements IDatabase {
 		return boards;
 	}
 
-	private postDocToDBO = (doc: mongoose.Document): PostDBO => {
+	private postDocToDBO = (doc: mongoose.Document, includeReplies: boolean): PostDBO => {
 		const da = doc as any;
-		return new PostDBO(
+		const post = new PostDBO(
 			da["post_title"],
 			da["post_content"],
 			this.boardDocToDBO(da["board"]),
 			this.filesDocToDBO(da["files_attached"]),
 			this.userDocToDBO(da["author"]),
 			da["date_created"],
-			this.repliesDocToDBO(da["replies"]),
+			[],
 			da["_id"],
 		);
+		if (includeReplies) { post.setReplies(this.repliesDocToDBO(da["replies"], post.getId())); }
+		return post;
 	}
 
-	private postsDocToDBO(docs: mongoose.Document[]): PostDBO[] {
+	private postsDocToDBO(docs: mongoose.Document[], includeReplies: boolean): PostDBO[] {
 		const dbos: PostDBO[] = [];
 		for (const p of docs) {
-			dbos.push(this.postDocToDBO(p));
+			dbos.push(this.postDocToDBO(p, includeReplies));
 		}
 
 		return dbos;
@@ -643,21 +689,21 @@ export class MongoDBImpl implements IDatabase {
 		return files;
 	}
 
-	private replyDocToDBO(doc: mongoose.Document): ReplyDBO {
+	private replyDocToDBO(doc: mongoose.Document, postId: string | number): ReplyDBO {
 		const da = doc as any;
 		return new ReplyDBO(
 			da["reply_content"],
-			this.postDocToDBO(da["post"]) as PostDBO,
-			this.userDocToDBO(da["author"]) as UserDBO,
+			postId,
+			this.userDocToDBO(da["author"]),
 			da["date_created"],
 			da["_id"],
 		);
 	}
 
-	private repliesDocToDBO(docs: mongoose.Document[]): ReplyDBO[] {
+	private repliesDocToDBO(docs: mongoose.Document[], postId: string | number): ReplyDBO[] {
 		const replies: ReplyDBO[] = [];
 		for (const r of docs) {
-			replies.push(this.replyDocToDBO(r));
+			replies.push(this.replyDocToDBO(r, postId));
 		}
 
 		return replies;

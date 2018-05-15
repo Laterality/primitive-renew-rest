@@ -15,9 +15,13 @@ export interface IDatabase {
 
 	/**
 	 * 회원 생성
-	 * @param newUser 생성할 회원
+	 * @param name { string } 사용자 이름
+	 * @param sid { string } 사용자 아이디
+	 * @param password { string } 암호화된 비밀번호
+	 * @param salt { string } 솔트값
+	 * @param roleTitle { string } 사용자 등급명
 	 */
-	createUser(newUser: UserDBO): Promise<UserDBO>;
+	createUser(name: string, sid: string, password: string, salt: string, roleTitle: string): Promise<UserDBO>;
 
 	/**
 	 * id로 회원을 조회
@@ -50,15 +54,15 @@ export interface IDatabase {
 
 	/**
 	 * 회원 정보를 삭제
-	 * @param user 삭제할 회원
+	 * @param userId 삭제할 회원 id(not sid)
 	 */
-	removeUser(user: UserDBO): Promise<void>;
+	removeUser(userId: string | number): Promise<void>;
 
 	/**
 	 * 역할 생성
-	 * @param role 생성할 역할
+	 * @param roleTitle 생성할 역할명
 	 */
-	createRole(role: RoleDBO): Promise<RoleDBO>;
+	createRole(roleTitle: string): Promise<RoleDBO>;
 
 	/**
 	 * 
@@ -79,9 +83,11 @@ export interface IDatabase {
 
 	/**
 	 * 게시판 생성
-	 * @param newBoard 생성할 게시판
+	 * @param boardTitle { string }생성할 게시판명
+	 * @param roleTitlesReadable { string[] } 읽기 가능한 역할명 배열
+	 * @param roleTitlesWritable { string[] } 쓰기 가능한 역할명 배열
 	 */
-	createBoard(newBoard: BoardDBO): Promise<BoardDBO>;
+	createBoard(boardTitle: string, roleTitlesReadable: string[], roleTitlesWritable: string[]): Promise<BoardDBO>;
 
 	/**
 	 * id로 게시판 조회
@@ -108,15 +114,19 @@ export interface IDatabase {
 
 	/**
 	 * 게시판 삭제
-	 * @param board 삭제할 게시판
+	 * @param boardId { string | number } 삭제할 게시판 id
 	 */
-	removeBoard(board: BoardDBO): Promise<void>;
+	removeBoard(boardId: string | number): Promise<void>;
 
 	/**
 	 * 게시물 생성
-	 * @param post 생성할 게시물
+	 * @param title { string } 게시물 제목
+	 * @param content { string } 게시물 내용
+	 * @param boardId { string | number } 게시판 id
+	 * @param fileIdsAttached { string[] | number[] } 첨부파일 id 배열
+	 * @param authorId { string | number } 작성자 id
 	 */
-	createPost(post: PostDBO): Promise<PostDBO>;
+	createPost(title: string, content: string, boardId: string | number, fileIdsAttached: string[] | number[], authorId: string | number): Promise<PostDBO>;
 
 	/**
 	 * 게시물 조회
@@ -141,15 +151,15 @@ export interface IDatabase {
 
 	/**
 	 * 게시물 삭제
-	 * @param post 삭제할 게시물
+	 * @param postId { string | number} 삭제할 게시물 id
 	 */
-	removePost(post: PostDBO): Promise<void>;
+	removePost(postId: string | number): Promise<void>;
 
 	/**
 	 * 댓글 생성
 	 * @param reply 생성할 댓글
 	 */
-	createReply(reply: ReplyDBO): Promise<ReplyDBO>;
+	createReply(content: string, postId: string | number, authorId: string | number): Promise<ReplyDBO>;
 
 	/**
 	 * 댓글 조회
@@ -165,15 +175,16 @@ export interface IDatabase {
 
 	/**
 	 * 댓글 삭제
-	 * @param reply 삭제할 댓글
+	 * @param replyId 삭제할 댓글 id
 	 */
-	removeReply(reply: ReplyDBO): Promise<void>;
+	removeReply(replyId: string | number): Promise<void>;
 
 	/**
 	 * 파일 생성
-	 * @param file 생성할 파일
+	 * @param fileName { string } 파일명
+	 * @param filePaht { string } 파일 경로
 	 */
-	createFile(file: FileDBO): Promise<FileDBO>;
+	createFile(fileName: string, filePath: string): Promise<FileDBO>;
 
 	/**
 	 * id로 파일 조회
