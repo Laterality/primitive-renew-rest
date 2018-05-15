@@ -25,7 +25,6 @@ import * as resHandler from "./lib/response-handler";
 import { APIRouter } from "./route/api/router";
 
 import { IDatabase } from "./db/db-interface";
-import { InMemoryDB } from "./db/in-memory.impl";
 import { MongoDBImpl } from "./db/mongodb.impl";
 import { UserDBO } from "./db/user.dbo";
 import { encryption } from "./lib/auth";
@@ -33,10 +32,7 @@ import { encryption } from "./lib/auth";
 // 앱 인스턴스, DB 인스턴스 초기화
 const app = express();
 let db: IDatabase | null = null;
-if (config.db.dbms === "in-memory") {
-	db = new InMemoryDB();
-}
-else if (config.db.dbms === "mongodb") {
+if (config.db.dbms === "mongodb") {
 	db = MongoDBImpl.getInstance();
 
 	// mongodb connection
