@@ -42,8 +42,9 @@ export interface IDatabase {
 	/**
 	 * 회원 검색
 	 * @param keyword 검색 키워드(학번, 이름)
+	 * @param top { number } 반환할 결과의 최대 개수
 	 */
-	searchUser(keyword: string, roleIds: string[]): Promise<UserDBO[]>;
+	searchUser(keyword: string, roleIds: string[], top?: number): Promise<UserDBO[]>;
 	
 	/**
 	 * 회원의 현재 상태를 DB에 반영
