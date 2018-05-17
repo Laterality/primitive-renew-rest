@@ -8,7 +8,6 @@ import * as express from "express";
 
 import * as auth from "../../../lib/auth";
 import * as resHandler from "../../../lib/response-handler";
-import * as roleCache from "../../../lib/role-cache";
 import * as serializer from "../../../lib/serializer";
 import { checkRole } from "../../../lib/session-handler";
 
@@ -71,7 +70,7 @@ export class UserAPI {
 			// 입력값 유효성 검사
 			if (name && sid && password && role) {
 				const authInfo = await auth.encryption(password);
-				const roleFound = roleCache.RoleCache.getInstance(this.db).getByTitle(role);
+				const roleFound = await this.db.findRoleByTitle(role);
 
 				if (!roleFound) {
 					// 해당 역할이 없는 경우
@@ -82,7 +81,7 @@ export class UserAPI {
 				}
 
 				// 사용자 모델 객체 생성
-				const userCreated = this.db.createUser(name, sid, authInfo[0], authInfo[1], roleFound.getTitle());
+				const userCreated = await this.db.createUser(name, sid, authInfo[0], authInfo[1], roleFound.getTitle());
 
 				return resHandler.response(res, new resHandler.ApiResponse(
 					resHandler.ApiResponse.CODE_OK,
@@ -228,7 +227,6 @@ export class UserAPI {
 		const usersFound: any[]			= [];
 		const queryRoleTitles: string	= req.query["roles"];
 		const roleIds: string[]			= [];
-		const rc						= roleCache.RoleCache.getInstance(this.db);
 		let roleTitles: string[] = [];
 
 		if (!checkRole(this.db, req, ["재학생", "관리자"])) {
@@ -243,11 +241,11 @@ export class UserAPI {
 		if (queryRoleTitles) {
 			roleTitles = queryRoleTitles.split(",");
 			for (const roleTitle of roleTitles) {
-				roleIds.push((rc.getByTitle(roleTitle) as RoleDBO).getId() as string);
+				roleIds.push((await this.db.findRoleByTitle(roleTitle) as RoleDBO).getId() as string);
 			}
 		}
 		else {
-			const senior = rc.getByTitle("재학생");
+			const senior = await this.db.findRoleByTitle("재학생");
 			if (senior) {
 				roleIds.push(senior.getId() as string);
 			}
@@ -337,8 +335,7 @@ export class UserAPI {
 
 			// 여기부터 사용자 수정
 			if (role && role.length > 0) {
-				const rc = roleCache.RoleCache.getInstance(this.db);
-				const roleDbo = rc.getByTitle(role);
+				const roleDbo = await this.db.findRoleByTitle(role);
 				if (!roleDbo) {
 					return resHandler.response(res, resHandler.createServerFaultResponse());
 				}
