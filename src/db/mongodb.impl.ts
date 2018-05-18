@@ -99,9 +99,9 @@ export class MongoDBImpl implements IDatabase {
 	 * @param roleIds 한정할 역할 id 배열
 	 * @param top { number } 반환할 결과의 최대 개수, 기본값 100
 	 */
-	public async searchUser(keyword: string, roleIds: string[], top = 100, includeAdmin = false): Promise<UserDBO[]> {
+	public async searchUser(keyword: string, roleIds: string[], top = 100): Promise<UserDBO[]> {
 		
-		let query = model.UserModel.find({
+		const query = model.UserModel.find({
 			$text: {
 				$search: keyword,
 			},
@@ -113,10 +113,6 @@ export class MongoDBImpl implements IDatabase {
 			})
 		.sort({ score: { $meta: "textScore" }})
 		.limit(top);
-		if (!includeAdmin) {
-			const roleAdmin = await this.findRoleByTitle("관리자");
-			query = query.ne({role: roleAdmin.getId()});
-		}
 
 		const result = await query.exec();
 		
