@@ -112,6 +112,7 @@ export class MongoDBImpl implements IDatabase {
 				score: { $meta: "textScore" },
 			})
 		.sort({ score: { $meta: "textScore" }})
+		.populate("role")
 		.limit(top);
 
 		const result = await query.exec();
