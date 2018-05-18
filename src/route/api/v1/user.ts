@@ -27,7 +27,7 @@ export class UserAPI {
 		this.router.post("/register", this.registerUser);
 		this.router.get("/users", this.retrieveAllUsers);
 		this.router.get("/user-by-id", this.retrieveUserById);
-		this.router.get("/find-by-name-or-sid/:key", this.searchUser);
+		this.router.get("/find-by-name-or-sid", this.searchUser);
 		this.router.put("/update/:userId", this.updateUser);
 		this.router.delete("/delete/:userId", this.deleteUser);
 	}
@@ -210,11 +210,11 @@ export class UserAPI {
 	/**
 	 * 이름 혹은 학번으로 회원 검색
 	 * 
-	 * @path: /find-by-name-or-sid/{key}
+	 * @path: /find-by-name-or-sid
 	 * @method: GET
 	 * 
 	 * Request
-	 * @param key { string } 검색 키워드 (회원의 이름 혹은 학번)
+	 * @query key { string } 검색 키워드 (회원의 이름 혹은 학번)
 	 * @query roles { string } 검색할 역할 범위(역할명을 ,로 구분, 기본값=["재학생"])
 	 * 
 	 * Response
@@ -223,7 +223,7 @@ export class UserAPI {
 	 * @body users { UserModel[] } 검색 결과
 	 */
 	private searchUser = async (req: express.Request, res: express.Response) => {
-		const key: string				= req.params["key"];
+		const key: string				= req.query["key"];
 		const usersFound: any[]			= [];
 		const queryRoleTitles: string	= req.query["roles"];
 		const roleIds: string[]			= [];
