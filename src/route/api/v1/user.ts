@@ -344,9 +344,9 @@ export class UserAPI {
 
 			const currentAuthInfo = await auth.encryption(pwCurrent, userFound.getSalt());
 
-			// 현재 비밀번호 일치하는지 확인
-			if (currentAuthInfo[0] === userFound.getPassword() &&
-				pwCurrent.length > 0) {
+			// 현재 비밀번호 일치하는지 확인, 관리자인 경우 무시
+			if ((currentAuthInfo[0] === userFound.getPassword() &&
+				pwCurrent.length > 0) || checkRole(this.db, req, ["관리자"])) {
 				// 비밀번호 변경
 				const newAuthInfo = await auth.encryption(pwNew, userFound.getSalt());
 
