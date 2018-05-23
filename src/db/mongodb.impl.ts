@@ -365,7 +365,12 @@ export class MongoDBImpl implements IDatabase {
 	public findPostById = async (id: string | number): Promise<PostDBO> => {
 		const postFound = await model.PostModel.findById(id)
 		.populate("board")
-		.populate("author")
+		.populate({
+			path: "author",
+			populate: {
+				path: "role",
+			},
+		})
 		.populate({
 			path: "replies",
 			populate: {
