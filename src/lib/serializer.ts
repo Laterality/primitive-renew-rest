@@ -82,7 +82,7 @@ export function serialize<T>(dbo: T): any {
 			reply_content: dbo.getContent(),
 			post_id: dbo.getPostId(),
 			author: serialize(dbo.getAuthor()),
-			dateCreated: dbo.getDateCreated()};
+			date_created: dbo.getDateCreated()};
 	}
 	else if (dbo instanceof FileDBO) {
 		return {
