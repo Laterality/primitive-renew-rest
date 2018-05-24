@@ -358,7 +358,7 @@ export class UserAPI {
 						"new password is same with current password"));
 				}
 
-				userFound.setPassword(pwNew);
+				userFound.setPassword(newAuthInfo[0]);
 
 				this.db.updateUser(userFound);
 
