@@ -100,20 +100,34 @@ export class MongoDBImpl implements IDatabase {
 	 * @param top { number } 반환할 결과의 최대 개수, 기본값 100
 	 */
 	public async searchUser(keyword: string, roleIds: string[], top = 100): Promise<UserDBO[]> {
+
+		let query;
 		
-		const query = model.UserModel.find({
-			$text: {
-				$search: keyword,
-			},
-			role: {
-				$in: roleIds,
-			},
-		}, {
-				score: { $meta: "textScore" },
+		if (keyword.length === 0) {
+			query = model.UserModel.find({
+				role: {
+					$in: roleIds,
+				},
 			})
-		.sort({ score: { $meta: "textScore" }})
-		.populate("role")
-		.limit(top);
+			.sort({ name: 1})
+			.populate("role")
+			.limit(top);
+		}
+		else {
+			query = model.UserModel.find({
+				$text: {
+					$search: keyword,
+				},
+				role: {
+					$in: roleIds,
+				},
+			}, {
+					score: { $meta: "textScore" },
+				})
+			.sort({ score: { $meta: "textScore" }})
+			.populate("role")
+			.limit(top);
+		}
 
 		const result = await query.exec();
 		
