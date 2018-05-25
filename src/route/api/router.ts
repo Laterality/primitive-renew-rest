@@ -62,7 +62,7 @@ export class APIRouter {
 				
 							// 관리자 계정 생성
 							const authInfo = await encryption("root");
-							this.db.createUser("root", "관리자", authInfo[0], authInfo[1], roleAdmin.getTitle());
+							this.db.createUser("관리자", "root", authInfo[0], authInfo[1], roleAdmin.getTitle());
 				
 							return resHandler.response(res, resHandler.createOKResponse());
 						}
