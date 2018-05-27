@@ -337,39 +337,46 @@ export class UserAPI {
 			if (role && role.length > 0) {
 				const roleDbo = await this.db.findRoleByTitle(role);
 				if (!roleDbo) {
-					return resHandler.response(res, resHandler.createServerFaultResponse());
+					return resHandler.response(res, 
+						resHandler.createServerFaultResponse());
 				}
 				userFound.setRole(roleDbo);
 			}
 
-			const currentAuthInfo = await auth.encryption(pwCurrent, userFound.getSalt());
+			// If request try to change password
+			if (pwCurrent.length > 0) {
+				const currentAuthInfo = await auth.encryption(pwCurrent,
+					userFound.getSalt());
 
-			// 현재 비밀번호 일치하는지 확인, 관리자인 경우 무시
-			if ((currentAuthInfo[0] === userFound.getPassword() &&
-				pwCurrent.length > 0) || checkRole(this.db, req, ["관리자"])) {
-				// 비밀번호 변경
-				const newAuthInfo = await auth.encryption(pwNew, userFound.getSalt());
+				// 현재 비밀번호 일치하는지 확인, 관리자인 경우 무시
+				if (currentAuthInfo[0] === userFound.getPassword() ||
+				checkRole(this.db, req, ["관리자"])) {
+					// 비밀번호 변경
+					const newAuthInfo = await auth.encryption(pwNew,
+						userFound.getSalt());
 
-				if (newAuthInfo[0] === currentAuthInfo[0]) {
-					// 현재 비밀번호와 새 비밀번호가 같은 경우
+					if (newAuthInfo[0] === currentAuthInfo[0]) {
+						// 현재 비밀번호와 새 비밀번호가 같은 경우
+						return resHandler.response(res, 
+							new resHandler.ApiResponse(
+							resHandler.ApiResponse.CODE_INVALID_PARAMETERS,
+							resHandler.ApiResponse.RESULT_FAIL,
+							"new password is same with current password"));
+					}
+
+					userFound.setPassword(newAuthInfo[0]);
+				}
+				else {
 					return resHandler.response(res, new resHandler.ApiResponse(
 						resHandler.ApiResponse.CODE_INVALID_PARAMETERS,
 						resHandler.ApiResponse.RESULT_FAIL,
-						"new password is same with current password"));
+						"incorrect password"));
 				}
-
-				userFound.setPassword(newAuthInfo[0]);
-
-				this.db.updateUser(userFound);
-
-				return resHandler.response(res, resHandler.createOKResponse());
 			}
-			else {
-				return resHandler.response(res, new resHandler.ApiResponse(
-					resHandler.ApiResponse.CODE_INVALID_PARAMETERS,
-					resHandler.ApiResponse.RESULT_FAIL,
-					"incorrect password"));
-			}
+
+			await this.db.updateUser(userFound);
+
+			return resHandler.response(res, resHandler.createOKResponse());
 		}
 		catch (e) {
 			this.eh.onError(e);
