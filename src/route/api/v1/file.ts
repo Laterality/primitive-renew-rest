@@ -7,6 +7,7 @@
 import * as express from "express";
 import * as fs from "fs";
 import * as multer from "multer";
+import * as path from "path";
 
 import { IErrorhandler } from "../../../lib/error-handler.interface";
 import * as resHandler from "../../../lib/response-handler";
@@ -26,11 +27,13 @@ export class FileAPI {
 	) {
 		this.router = express.Router();
 		const multerStorage = multer.diskStorage({
+			destination: fileDest,
 			filename: (req, file, cb) => {
-				cb(null, `${Date.now()}_${file.originalname}`);
+				const newFilename = file.originalname.replace(/\s/g, "-");
+				cb(null, `${Date.now()}_${newFilename}`);
 			},
 		});
-		this.upload = multer({dest: fileDest, storage: multerStorage});
+		this.upload = multer({storage: multerStorage});
 
 		this.router.post("/upload", this.upload.single("file"), this.uploadFile);
 

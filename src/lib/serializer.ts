@@ -87,8 +87,7 @@ export function serialize<T>(dbo: T): any {
 	else if (dbo instanceof FileDBO) {
 		return {
 			id: dbo.getId(),
-			filename: dbo.getFilename(),
-			path: dbo.getPath()};
+			filename: dbo.getFilename()};
 	}
 	else {
 		throw new Error("unsupported type");

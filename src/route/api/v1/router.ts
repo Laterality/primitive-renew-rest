@@ -12,9 +12,12 @@ import { IErrorhandler } from "../../../lib/error-handler.interface";
 import * as resHandler from "../../../lib/response-handler";
 
 import { AuthAPI } from "./auth";
+import { FileAPI } from "./file";
 import { PostAPI } from "./post";
 import { ReplyAPI } from "./reply";
 import { UserAPI} from "./user";
+
+import { config } from "../../../config";
 
 export class V1API {
 
@@ -26,6 +29,8 @@ export class V1API {
 		this.router = express.Router();
 		this.router.use("/auth", new AuthAPI(db, eh).getRouter());
 		this.router.use(this.sessionCheck);
+		this.router.use("/file", new FileAPI(this.db, config.path_public,
+			this.eh).getRouter());
 		this.router.use("/user", new UserAPI(this.db, this.eh).getRouter());
 		this.router.use("/post", new PostAPI(this.db, this.eh).getRouter());
 		this.router.use("/reply", new ReplyAPI(this.db, this.eh).getRouter());
