@@ -204,5 +204,5 @@ export interface IDatabase {
 	 * TODO: 더이상 사용되지 않는 파일은 서버에서 제거하도록 해야 함
 	 * @param file 삭제할 파일
 	 */
-	removeFile(file: FileDBO): Promise<void>;
+	removeFile(fileId: string | number): Promise<void>;
 }

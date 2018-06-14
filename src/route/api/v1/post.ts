@@ -15,6 +15,7 @@ import { checkRole } from "../../../lib/session-handler";
 
 import { FileDBO } from "../../../db/file.dbo";
 import { PostDBO } from "../../../db/post.dbo";
+import { deleteFile } from "../../../lib/file-util";
 
 export class PostAPI {
 	private router: express.Router;
@@ -271,6 +272,11 @@ export class PostAPI {
 				}
 
 			if (filesAttached) {
+				// 첨부파일이 있는 경우, 기존에 참조하던 파일을 삭제
+				const files = postFound.getFiles();
+				for (const f of files) {
+					deleteFile(f.getId(), this.db);
+				}
 				postFound.setFiles(await this.db.findFilesById(filesAttached));
 			}
 			if (postTitle && postTitle.length > 0) {
@@ -337,8 +343,7 @@ export class PostAPI {
 
 			// 게시물이 참조하는 파일 삭제
 			for (const f of postFound.getFiles()) {
-				await this.db.removeFile(f);
-				fs.unlinkSync(f.getPath + "/" + f.getFilename());
+				deleteFile(f.getId(), this.db);
 			}
 
 			await this.db.removePost(postFound.getId());

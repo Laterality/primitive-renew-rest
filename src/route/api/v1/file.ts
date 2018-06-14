@@ -5,7 +5,6 @@
  * date: 2018-04-13
  */
 import * as express from "express";
-import * as fs from "fs";
 import * as multer from "multer";
 import * as path from "path";
 
@@ -36,7 +35,6 @@ export class FileAPI {
 		this.upload = multer({storage: multerStorage});
 
 		this.router.post("/upload", this.upload.single("file"), this.uploadFile);
-
 	}
 
 	public getRouter = () => this.router;

@@ -605,8 +605,8 @@ export class MongoDBImpl implements IDatabase {
 	 * 파일 삭제
 	 * @param file 삭제할 파일
 	 */
-	public async removeFile(file: FileDBO): Promise<void> {
-		const fileFound = await model.FileModel.findById(file.getId()).exec();
+	public async removeFile(fileId: string | number): Promise<void> {
+		const fileFound = await model.FileModel.findById(fileId).exec();
 
 		if (!fileFound) { throw new Error("not found"); }
 
